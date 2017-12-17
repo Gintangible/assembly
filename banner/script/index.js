@@ -1,5 +1,6 @@
 ﻿var Slider = function( options ){
     var noop = function () {};
+
     $.extend( this, {
         element: null,
         prefix : '',
@@ -14,7 +15,6 @@
     }, options || {} );
 
     this.view = null;
-    this.sport = null;
     this.items = [];
     this.length = 0;
     //this.distance = 0;
@@ -29,7 +29,6 @@ Slider.prototype = {
         var self = this,
             element = this.element,
             view = this.view = element.children(':first'),
-            // sport = this.sport = view.children(':first'),
             items = this.items = view.children();
 
         // 获取每次移动的距离
@@ -45,7 +44,6 @@ Slider.prototype = {
     },
 
     createArrow : function(){
-
         if (!this.arrow) return;
 
         var self = this,
@@ -85,8 +83,8 @@ Slider.prototype = {
                 self.move($(this).index());
             });
 
-
         var originalOnBeforeMove = events.btnChange;
+
         events.btnChange = function ( index ) {
             buttons.removeClass('cur').eq(index).addClass('cur');
             return originalOnBeforeMove.apply(this, arguments);
@@ -136,7 +134,7 @@ Slider.prototype = {
         this.items.removeClass("cur").eq(index).addClass('cur');
         this.current = index;
 
-        events.btnChange.call(this, index >= length ? 0 : index);
+        events.btnChange && events.btnChange.call(this, index >= length ? 0 : index);
     },
 
     prev : function(){
