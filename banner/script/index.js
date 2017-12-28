@@ -136,7 +136,6 @@ Slider.prototype = {
 
         events.btnChange && events.btnChange.call(this, index >= length ? 0 : index);
     },
-
     prev : function(){
         this.move(this.current - 1 );
     },
@@ -155,9 +154,6 @@ Slider.prototype = {
     }
 
 };
-
-
-
 
 
 

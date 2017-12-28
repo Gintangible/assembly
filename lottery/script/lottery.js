@@ -5,7 +5,7 @@ var Lottery = function (options) {
 
 
     this.index = 0; //当前转动到哪个位置，起点位置
-    this.count = 16; //总共有多少个位置
+    this.count = 10; //总共有多少个位置
     this.timer = 0; //setTimeout的ID，用clearTimeout清除
     this.speed = 200; //初始转动速度
     this.times = 0; //转动次数
@@ -26,37 +26,42 @@ Lottery.prototype = {
     },
 
     getData: function (callback) {
-        var self = this;
+        var self = this,
+            data ={
+            "status": Math.floor(Math.random()*3),
+            "id": Math.floor(Math.random()*11)
+            };
+        self.data = data;
+        self.isRoll(callback);
 
-        $.ajax({
-            url: "../test.json",
-            dataType: "jsonp",
-            success: function (data) {
-                self.data = data;
-                self.isRoll(callback);
-            }
-
-
-        })
-    
+        // $.ajax({
+        //     url: "../test.json",
+        //     dataType: "jsonp",
+        //     success: function (data) {
+        //         self.data = data;
+        //         self.isRoll(callback);
+        //     }
+        //
+        // })
+        //
     },
 
     isRoll: function (callback) {
         var data = this.data,
             status = data.status;
 
-        if (status == -1) {
-            alert("不可抽奖的情况")
+        if (status == 0) {
+            alert("不可抽奖")
             callback && callback();
             return;
         }
 
-        if (status == 0) {
+        if (status == 1) {
             this.prizeSet(data.id, callback);
         }
 
-        if (status == -2) {
-            this.prizeSet((Math.random() > .5 ? 6 : 14), callback);
+        if (status == 2) {
+            this.prizeSet((Math.random() > .5 ? 7 : 7), callback);
         }
     },
 
@@ -69,15 +74,15 @@ Lottery.prototype = {
         var self = this,
             index = this.index;
 
-        if ($("lottery-unit-" + index)[0]) {
-            $("lottery-unit-" + index)[0].removeClass("cur");
+        if ($(".lottery-unit-" + index)) {
+            $(".lottery-unit-" + index).removeClass("cur");
         }
 
         index++;
 
         if (index > this.count) index = 1;
 
-        $("lottery-unit-" + index)[0].addClass("cur")
+        $(".lottery-unit-" + index).addClass("cur");
 
         this.index = index;
 
@@ -93,7 +98,7 @@ Lottery.prototype = {
         if (this.times > this.cycle + 10 && prize == this.index) {
             clearTimeout(this.timer);
             if (this.data) {
-                if (data.status == -2) {//谢谢参与
+                if (data.status == 2) {//谢谢参与
                     setTimeout(function () {
                         alert("谢谢参与")
                     }, 500);

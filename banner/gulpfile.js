@@ -11,7 +11,7 @@ gulp.task('sass',function() {
     // gulp.src('./sass/*.scss')
     //     .pipe(sass())
     return sass('./sass/*.scss',{style:'expanded'})
-        .pipe(minifyCSS({keepBreaks:false,compatibility:'ie7'}))
+        // .pipe(minifyCSS({keepBreaks:false,compatibility:'ie7'}))
         .pipe(gulp.dest('./css'));
 });
 
