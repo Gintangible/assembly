@@ -5,7 +5,7 @@ var Lottery = function (options) {
 
 
     this.index = 0; //当前转动到哪个位置，起点位置
-    this.count = 10; //总共有多少个位置
+    this.count = 9; //总共有多少个位置
     this.timer = 0; //setTimeout的ID，用clearTimeout清除
     this.speed = 200; //初始转动速度
     this.times = 0; //转动次数
@@ -29,7 +29,7 @@ Lottery.prototype = {
         var self = this,
             data ={
             "status": Math.floor(Math.random()*3),
-            "id": Math.floor(Math.random()*11)
+            "id": Math.floor(Math.random()*10)
             };
         self.data = data;
         self.isRoll(callback);
@@ -61,7 +61,7 @@ Lottery.prototype = {
         }
 
         if (status == 2) {
-            this.prizeSet((Math.random() > .5 ? 7 : 7), callback);
+            this.prizeSet((Math.random() > .5 ? 6 : 6), callback);
         }
     },
 
@@ -72,17 +72,18 @@ Lottery.prototype = {
 
     actRoll: function () {
         var self = this,
-            index = this.index;
+            index = this.index,
+            items = this.items;
 
-        if ($(".lottery-unit-" + index)) {
-            $(".lottery-unit-" + index).removeClass("cur");
+        if (items.eq(index)) {
+            items.eq(index).removeClass("cur");
         }
 
         index++;
 
-        if (index > this.count) index = 1;
+        if (index > this.count) index = 0;
 
-        $(".lottery-unit-" + index).addClass("cur");
+        items.eq(index).addClass("cur");
 
         this.index = index;
 
@@ -114,7 +115,7 @@ Lottery.prototype = {
             if (this.times <= this.cycle) {
                 this.speed -= 10;
             } else {
-                if (this.times > this.cycle + 10 && ((this.prize == 0 && this.index == 16) || this.prize == this.index + 1)) {
+                if (this.times > this.cycle + 10 && (this.prize == 0 && this.index == 16) ) {
                     this.speed += 110;
                 } else {
                     this.speed += 20;
@@ -123,6 +124,7 @@ Lottery.prototype = {
             if (this.speed < 40) {
                 this.speed = 40;
             }
+            
             this.timer = setTimeout(function () {
                 self.stop(callback);
             }, self.speed);
@@ -148,6 +150,6 @@ Lottery.prototype = {
 
 new Lottery({
     wrap: $("#lottery_box"),
-    items: $("lottery-unit"),
+    items: $(".lottery-unit"),
     button: $("#lottery_start"),
 });
