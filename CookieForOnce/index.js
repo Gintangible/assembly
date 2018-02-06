@@ -78,3 +78,7 @@ var DoOnce = function (name,time) {
 
 	Cookie.set(name, "1", leftTime);
 };
+
+export function(name,time){
+	DoOnce(name,time);
+};

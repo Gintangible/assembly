@@ -1,6 +1,5 @@
-(function(){
 // 禁止用户选中
-!function(){
+export var noSelect = function(){
 	/**
 	 * 判断浏览器是否支持user-select样式
 	 */

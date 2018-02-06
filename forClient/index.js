@@ -1,6 +1,6 @@
 // 前端给接口给 客户端
 
-var Client = function () {
+export var Client = function () {
 	var callbacks = {};
 	var win = window;
 	var support = function () {
@@ -61,3 +61,5 @@ var Client = function () {
 		off: off
 	};
 } ();
+
+
