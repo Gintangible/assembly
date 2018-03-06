@@ -1,0 +1,135 @@
+@import "reset";
+@import "define";
+
+html,body{
+  width: 100%;
+  height: 100%;
+}
+
+body{
+	background: #222;
+	font-family: "Helvetica";
+	@extend %oh;
+}
+
+.control-box{
+  // @extend %fl;
+  @extend %pa;
+  left:0;
+  top: 0;
+  width: 250px;
+  height: 100%;
+  padding: 30px;
+  box-sizing: border-box;
+  color: #49f;
+  background-color: rgba(0, 0, 0,.5);
+  font-size: 14px;
+  transition: all .5s linear;
+  &.drawer{
+    left: -250px;
+  }
+}
+
+.control-style{
+  h1{
+    font-size: 30px;
+    color: orange;
+    margin: 10px 0 30px 30px;
+    font-family: "Microsoft Yahei";
+    font-weight: 100;
+  }
+	p{
+    margin-bottom: -10px;
+    &.shape{
+      margin: 0 0 20px 10px;
+    }
+  }
+  input{
+      border: none;
+      background-color: transparent;
+      margin: 20px 0;
+      outline: none;
+      &[type='text']{
+        width: 100%;
+        font-size: 25px;
+        appearance: none;
+        padding-bottom: 5px;
+        border-bottom: 3px solid #ededed;
+        color: #ededed;
+      }
+      &[type='range']{
+        width: 100%;
+        -webkit-appearance: none;
+        background-color: silver;
+        height: 8px;
+        &::-webkit-slider-thumb{
+          -webkit-appearance: none;
+          background-color: seagreen;
+          width: 10px;
+          height: 20px;
+        }
+      }
+      
+  }
+}
+
+.shape{
+  @extend %oh;
+  span{
+    @extend %fl;
+    width: 80px;
+    height: 30px;
+    line-height: 30px;
+    @extend %cp;
+    @extend %tac;
+    border: 1px solid #222;
+    color: #444;
+    &:first-child{
+      border-radius: 10px 0 0 10px;
+    }
+    &:last-child{
+      border-radius: 0 10px 10px 0;
+    }
+    &.cur{
+      background: orange;
+    }
+  }
+}
+
+.control-btn{
+	@extend %pa;
+	top: 20px;
+	right: -40px;
+  @extend %cp;
+  span{
+    @extend %db;
+    width: 20px;
+    height: 1px;
+    margin-bottom: 4px;
+    border-bottom: 2px solid #fff;
+  }
+}
+
+.content{
+  // @extend %fl;
+  @extend %pa;
+  width: 100%;
+  height: 100%;
+  canvas{
+    @extend %pa;
+    left: 0;
+    top: 0;
+  }
+  p{
+    @extend %pa;
+    bottom: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 20px 50px;
+    color: rgba(255,255,255,.5);
+    font-size: 12px;
+    font-weight: lighter;
+    @extend %tac;
+    border-top: 1px solid rgba(255,255,255,.5);
+  }
+}
