@@ -73,21 +73,24 @@
             // get type
             this.type = options.type;
 
-            radVal = options.rad;
             // 移动效果
             this.graVal = options.gra;
             colors = options.colors;
             this.color = colors[Math.floor(Math.random() * colors.length)];
 
             // 大小
+            this.rad = +options.rad;
             this.sSize = 1.1;
-            this.eSize = Common.random(radVal, radVal + 3); //[1.1,5.1]
+            this.eSize = Common.random(this.rad,this.rad+3); //[1.1,5.1]
 
+            // 速度
+            this.spd = options.speed;
 
             this.vx = 0;
             this.vy = 0;
             this.friction = .99;
 
+                   
             this.init();
 
         }
@@ -96,11 +99,10 @@
             constructor: Particle,
             init: function () {
                 this.getType(this.type);
-                this.setSpeed(Common.random(.1, .5));
+                this.setSpeed(this.spd);
 
                 this.setAngle(Common.random(Common.degreesToRads(0), Common.degreesToRads(360)));
 
-                this.animate();
             },
 
             getType: function (type) {
@@ -130,7 +132,7 @@
             },
 
             setAngle: function (distance) {
-                var speed = this.getAngle();
+                var speed = this.getSpeed();
                 this.vx = Math.cos(distance) * speed;
                 this.vy = Math.sin(distance) * speed;
             },
@@ -145,11 +147,8 @@
                 this.vy = Math.sin(angle) * speed;
             },
 
-            getDistance: function () {
-                return Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-            },
-
-            updata: function () {
+            update: function () {
+                this.getType(this.type);
                 this.x += this.vx;
                 this.y += this.vy;
                 this.vy += this.graVal;
@@ -159,7 +158,6 @@
                 if (this.sSize < this.eSize) {
                     this.sSize += this.durVal;
                 } else {
-
                     this.sSize -= this.durVal;
                 }
 
@@ -170,15 +168,10 @@
                     this.eAngle = Common.random(radVal, radVal + 3);
                     this.setHeading(Common.random(Common.degreesToRads(0), Common.degreesToRads(360)));
                 }
-            },
-
-            animate: function () {
-                // ctx.clearRect(0, 0, W, H);
-
-                this.updata();
             }
+            
         };
-
+        
         function canvasDraw() {
             var options = getOptions(),
                 gridX = gridY = 7 || options.res,
@@ -202,15 +195,16 @@
                     }
                 }
             }
+            
 
-            // (function drawFrame() {
-            //     window.requestAnimationFrame(drawFrame, canvas);
-            //     ctx.clearRect(0, 0, W, H);
-
-            //     for (var i = 0; i < placeAry.placement.length; i++) {
-            //         new Particle.placement[i].update();
-            //     }
-            // } ())
+            (function drawFrame() {
+                window.requestAnimationFrame(drawFrame, canvas);
+                ctx.clearRect(0, 0, W, H);
+                var i = 0; len = placeAry.length;
+                for (;i < len; i++) {
+                    placeAry[i].update();
+                }
+            } ())
 
 
         };
