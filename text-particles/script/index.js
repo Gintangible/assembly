@@ -47,8 +47,8 @@
             options.type = $('.shape span.cur').attr('data-shape') || "ball";
             options.msg = $('.message').val() || "❤";
             options.gra = $('.gra').val() || 0;
-            options.dur = $('.dur').val() || .4;
-            options.speed = $('.speed').val() || .1;
+            options.dur = $('.dur').val() || .2;
+            options.durTime = $('.time').val() || .1;
             options.rad = $('.rad').val() || 2;
             options.res = $('.res').val() || 7;
             options.colors = [
@@ -73,44 +73,39 @@
             // get type
             this.type = options.type;
 
-            // 移动效果
-            this.graVal = options.gra;
+            // 颜色
             colors = options.colors;
             this.color = colors[Math.floor(Math.random() * colors.length)];
 
             // 大小
             this.rad = +options.rad;
             this.sSize = 1.1;
-            this.eSize = Common.random(this.rad,this.rad+3); //[1.1,5.1]
+            this.eSize = Common.random(this.rad, this.rad + 3); //[1.1,5.1]
+            // 增幅
+            this.durVal = +options.dur / 2;
+
+
+            // 设置出现的粒子位置
+            this.vx = Math.floor(Common.random(0, W));
+            this.vy = Math.floor(Common.random(0, H));
+
+            //角度
+            this.angle = Math.atan2(this.vy - this.y, this.vx - this.x);//atan2 夹角的弧度值;
 
             // 速度
-            this.spd = options.speed;
-
-            this.vx = 0;
-            this.vy = 0;
-            this.friction = .99;
-
-                   
-            this.init();
+            this.spd = this.getDistance() / +options.durTime / 60;
 
         }
 
         Particle.prototype = {
             constructor: Particle,
-            init: function () {
-                this.getType(this.type);
-                this.setSpeed(this.spd);
-
-                this.setAngle(Common.random(Common.degreesToRads(0), Common.degreesToRads(360)));
-
-            },
 
             getType: function (type) {
                 if (type === "ball") {
                     ctx.save();
                     ctx.fillStyle = this.color;
                     ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.eSize, 0, Math.PI * 2, false);
+                    ctx.arc(this.vx, this.vy, this.sSize, 0, Math.PI * 2, false);
                     ctx.closePath();
                     ctx.fill();
                     ctx.restore();
@@ -120,64 +115,80 @@
                     ctx.save();
                     ctx.fillStyle = this.color;
                     ctx.beginPath();
-                    ctx.fillRect(this.x, this.y, this.eSize, this.eSize)
+                    ctx.fillRect(this.vx, this.vy, this.sSize, this.sSize)
                     ctx.closePath();
                     ctx.fill();
                     ctx.restore();
                 }
             },
 
-            getAngle: function () {
-                return Math.atan2(this.vy, this.vx);//atan2 其参数比值的反正切值
+            getDistance: function () {
+                return Math.sqrt((this.vy - this.y) * (this.vy - this.y) + (this.vx - this.x) * (this.vx - this.x));
             },
 
-            setAngle: function (distance) {
-                var speed = this.getSpeed();
-                this.vx = Math.cos(distance) * speed;
-                this.vy = Math.sin(distance) * speed;
-            },
-
-            getSpeed: function () {
-                return Math.sqrt(this.vx * this.vx + this.vy * this.vy);
-            },
-
-            setSpeed: function (speed) {
-                var angle = this.getAngle();
-                this.vx = Math.cos(angle) * speed;
-                this.vy = Math.sin(angle) * speed;
-            },
 
             update: function () {
-                this.getType(this.type);
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vy += this.graVal;
+                if (!this.dyingX) {
+                    if (this.vx >= this.base[0]) {
+                        this.vx -= this.spd * Math.cos(this.angle);
+                        if (this.vx < this.x) {
+                            this.dyingX = true;
+                            this.vx = this.x;
+                        }
+                    } else {
+                        this.vx -= this.spd * Math.cos(this.angle);
+                        if (this.vx > this.x) {
+                            this.dyingX = true;
+                            this.vx = this.x;
+                        }
+                    }
+                }
 
-                this.vx *= this.friction;
-                this.vy *= this.friction;
-                if (this.sSize < this.eSize) {
+                if (!this.dyingY) {
+                    if (this.vy >= this.base[1]) {
+                        if (this.dyingY) return;
+                        this.vy -= this.spd * Math.sin(this.angle);
+                        if (this.vy < this.y) {
+                            this.dyingY = true;
+                            this.vy = this.y;
+                        }
+                    } else {
+                        if (this.dyingY) return;
+                        this.vy -= this.spd * Math.sin(this.angle);
+                        if (this.vy > this.y) {
+                            this.dyingY = true;
+                            this.vy = this.y;
+                        }
+                    }
+                }
+
+
+                if (this.sSize < this.eSize && this.dyingS === false) {
                     this.sSize += this.durVal;
                 } else {
+                    this.dyingS = true;
+                }
+
+                if (this.dyingS) {
                     this.sSize -= this.durVal;
                 }
 
-                if (this.y < 0 || this.sAngle < 1) {
-                    this.x = this.base[0];
-                    this.y = this.base[1];
-                    this.setSpeed(spdVal);
-                    this.eAngle = Common.random(radVal, radVal + 3);
-                    this.setHeading(Common.random(Common.degreesToRads(0), Common.degreesToRads(360)));
+                if (this.sSize < 1) {
+                    this.dyingS = false;
                 }
+                
+                this.getType(this.type);
+
             }
-            
+
         };
-        
+
         function canvasDraw() {
             var options = getOptions(),
-                gridX = gridY = 7 || options.res,
+                gridX = gridY = +options.res,
                 fontSize = 100,
                 placeAry = [];
-
+                
             canvas.width = W;
             canvas.height = H;
 
@@ -195,13 +206,13 @@
                     }
                 }
             }
-            
+
 
             (function drawFrame() {
                 window.requestAnimationFrame(drawFrame, canvas);
                 ctx.clearRect(0, 0, W, H);
                 var i = 0; len = placeAry.length;
-                for (;i < len; i++) {
+                for (; i < len; i++) {
                     placeAry[i].update();
                 }
             } ())
