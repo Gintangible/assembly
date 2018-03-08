@@ -30,7 +30,7 @@
             })
         })
 
-        $('.message, .gra, .dur, .speed, .rad, .res').on("input", function () {
+        $('.message, .gra, .dur, .time, .rad, .res').on("input", function () {
             canvasShow.canvasDraw();
         })
     } ();
@@ -131,13 +131,13 @@
                 if (!this.dyingX) {
                     if (this.vx >= this.base[0]) {
                         this.vx -= this.spd * Math.cos(this.angle);
-                        if (this.vx < this.x) {
+                        if (this.vx <= this.x) {
                             this.dyingX = true;
                             this.vx = this.x;
                         }
                     } else {
                         this.vx -= this.spd * Math.cos(this.angle);
-                        if (this.vx > this.x) {
+                        if (this.vx >= this.x) {
                             this.dyingX = true;
                             this.vx = this.x;
                         }
@@ -146,16 +146,14 @@
 
                 if (!this.dyingY) {
                     if (this.vy >= this.base[1]) {
-                        if (this.dyingY) return;
                         this.vy -= this.spd * Math.sin(this.angle);
-                        if (this.vy < this.y) {
+                        if (this.vy <= this.y) {
                             this.dyingY = true;
                             this.vy = this.y;
                         }
                     } else {
-                        if (this.dyingY) return;
                         this.vy -= this.spd * Math.sin(this.angle);
-                        if (this.vy > this.y) {
+                        if (this.vy >= this.y) {
                             this.dyingY = true;
                             this.vy = this.y;
                         }
@@ -188,7 +186,7 @@
                 gridX = gridY = +options.res,
                 fontSize = 100,
                 placeAry = [];
-                
+
             canvas.width = W;
             canvas.height = H;
 
