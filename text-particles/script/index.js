@@ -17,10 +17,10 @@
     // 控制面板显示
     var boxFn = function () {
         var btn = $('.control-btn'),
-            box = $('.control-box');
+            body = $('body');
 
         btn.on("click", function () {
-            box.toggleClass('drawer');
+            body.toggleClass('drawer');
         })
 
         $(".shape span").each(function (index, item) {
@@ -40,9 +40,9 @@
             ctx = canvas.getContext('2d'),
             W = $('.content').innerWidth() || 400,
             H = $('.content').innerHeight() || 200;
+
         function getOptions() {
             var options = {};
-
 
             options.type = $('.shape span.cur').attr('data-shape') || "ball";
             options.msg = $('.message').val() || "❤";
@@ -120,6 +120,36 @@
                     ctx.fill();
                     ctx.restore();
                 }
+                
+                if (type === "love") {
+                    var vertices = this.drawLove(this.vx,this.vy,this.sSize);
+                    ctx.save();
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    ctx.translate(this.vx, this.vy);
+                    ctx.rotate(Math.PI);
+                    for (let i = 0; i < 50; i++) {
+                        var vector = vertices[i];
+                        ctx.lineTo(vector.x, vector.y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.restore();
+                }
+            },
+
+            drawLove: function (x,y,r) {
+                var vertices = [];
+                for (var i = 0; i < 50; i++) {
+                    var step = i / 50 * (Math.PI * 2);//设置心上面两点之间的角度，具体分成多少份，好像需要去试。
+                    var vector = {
+                        x: .1 * r * (16 * Math.pow(Math.sin(step), 3)),
+                        y: .1 * r * (13 * Math.cos(step) - 5 * Math.cos(2 * step) - 2 * Math.cos(3 * step) - Math.cos(4 * step))
+                    }
+                    vertices.push(vector);
+                }
+
+                return vertices;
             },
 
             getDistance: function () {
@@ -174,7 +204,7 @@
                 if (this.sSize < 1) {
                     this.dyingS = false;
                 }
-                
+
                 this.getType(this.type);
 
             }
