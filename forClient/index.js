@@ -63,3 +63,8 @@ export var Client = function () {
 } ();
 
 
+window.CB_Call_JS = function (name, json, callback) {
+    alert(name + json);
+};
+
+
