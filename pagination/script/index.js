@@ -3,18 +3,20 @@ var Pagenation = function (options) {
     /*
     * parma dataArg        	    array       保存列表数据
     * parma actClassName        string      按钮激活类名
-    * parma size                number      默认每页数量
+    * parma size                number      默认每页数量 10
     * parma arrowBtn            booble      是否创建上一页下一页
     * parma prevClassName       string      按钮上一页类名
     * parma nextClassName       string      按钮下一页类名
     * parma numBtn              booble      数字分页
-    * parma curIndex            number      当前页
+    * parma curIndex            number      当前页（数组形式）
+    * parma interfacePaging     booble      是否接口分页
     */
     this.dataAry = [];
     this.actClassName = 'active';
     this.prevClassName = 'prev';
     this.nextClassName = 'next';
     this.size = 10;
+    this.interfacePaging = false;
     this.arrowBtn = true;
     this.numBtn = true;
     this.curIndex = 0;
@@ -35,13 +37,21 @@ Pagenation.prototype = {
     },
     // 获取数据
     _getData: function (callback) {
+        // arg1 为传递的数组 arg2为分页数（不是必须，for分页请求）
         throw new Error('must set a _getData function');
     },
     // 执行
     _init: function () {
         var _this = this;
-        this._getData(function (data) {
-            _this._showInit(data);
+        this._getData(function (dataAry, pageLen) {
+            _this._showInit(dataAry);
+            if (_this.numBtn) {
+                _this._renderPageControl(pageLen);
+            }
+            if (_this.arrowBtn) {
+                _this._createPrev();
+                _this._createNext(pageLen);
+            }
         })
     },
     // 显示初始化
@@ -50,36 +60,40 @@ Pagenation.prototype = {
 
         this._dataArySave(data, function () {
             _this._conChange(_this.curIndex);
-            if (_this.arrowBtn) {
-                _this._createPrev();
-                _this._createNext();
-            }
-            if (_this.numBtn) {
-                _this._renderPageControl(data.length);
-            }
         });
     },
 
-     // 页面改变时变化
+    // 页面改变时变化
     _conChange: function (index) {
+        var _this = this;
+        // index 为当前页
+        this.curIndex = index;
+        if (!this.dataAry[index]) {
+            this._getData(function (dataAry) {
+                _this._showInit(dataAry);
+            });
+            return;
+        }
         this._pageBtnStatus(index)
         this._renderContent(index);
-        this.curIndex = index;
     },
 
     // 保存分页数据
     _dataArySave: function (data, callback) {
-        var totalSize = Math.ceil(data.length / this.size),
-            size = this.size,
-            i = 0;
-
-        for (; i < totalSize; i++) {
-            this.dataAry.push(data.slice(size * i, size * (i + 1)));
+        if (!this.interfacePaging) {
+            var totalSize = Math.ceil(data.length / this.size),
+                size = this.size,
+                i = 0;
+            for (; i < totalSize; i++) {
+                this.dataAry.push(data.slice(size * i, size * (i + 1)));
+            }
+        } else {
+            this.dataAry[this.curIndex] = data;
         }
 
         callback && callback();
     },
-    
+
 
     // 分页按钮状态
     _pageBtnStatus: function (index) {
@@ -102,8 +116,9 @@ Pagenation.prototype = {
             controlBtn = controlWrapper.find('ul'),
             fragment = document.createDocumentFragment(),
             element,
-            i = 0;
-        
+            i = 0,
+            len = len || this.dataAry.length;
+
         for (; i < len; i++) {
             element = document.createElement('li');
             element.innerHTML = _this._formatPageControl(i);
@@ -136,14 +151,15 @@ Pagenation.prototype = {
     },
 
     // 下一页按钮
-    _createNext: function () {
+    _createNext: function (len) {
         var _this = this,
             controlEl = this.controlEl,
             prev = document.createElement('span'),
-            len = this.dataAry.length - 1;
+            len = (len || this.dataAry.length) - 1;
+
+
         prev.className = this.nextClassName;
         prev.innerHTML = '下一页';
-
         prev.addEventListener('click', function () {
             _this.curIndex = _this.curIndex++ >= len ? len : _this.curIndex;
             _this._conChange(_this.curIndex);
@@ -172,15 +188,16 @@ Pagenation.prototype = {
     }
 }
 
-
 var pagenation1 = new Pagenation({
     conEl: $(".page-content"),
     controlEl: $('.control-wrapper'),
-    size: 1,
+    size: 2,
+    interfacePaging: false,
     _getData: function (callback) {
         $.ajax({
             type: "GET",
-            url: './data/data1.json',
+            // url: '//gamebox.2144.cn/v1/server/list/gid/' + 92,
+            url: './data/data' + (1 || (this.curIndex + 1)) + '.json',
             // dataType: "jsonp",
             success: function (data) {
                 callback && callback(data.list);
