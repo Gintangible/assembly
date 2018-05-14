@@ -5,11 +5,15 @@ var Pagenation = function (options) {
     * parma actClassName        string      按钮激活类名
     * parma size                number      默认每页数量
     * parma arrowBtn            booble      是否创建上一页下一页
+    * parma prevClassName       string      按钮上一页类名
+    * parma nextClassName       string      按钮下一页类名
     * parma numBtn              booble      数字分页
     * parma curIndex            number      当前页
     */
     this.dataAry = [];
     this.actClassName = 'active';
+    this.prevClassName = 'prev';
+    this.nextClassName = 'next';
     this.size = 10;
     this.arrowBtn = true;
     this.numBtn = true;
@@ -31,7 +35,7 @@ Pagenation.prototype = {
     },
     // 获取数据
     _getData: function (callback) {
-        throw new Error('need set a _getData function');
+        throw new Error('must set a _getData function');
     },
     // 执行
     _init: function () {
@@ -45,30 +49,24 @@ Pagenation.prototype = {
         var _this = this;
 
         this._dataArySave(data, function () {
-            _this._renderContent(_this.curIndex);
+            _this._conChange(_this.curIndex);
             if (_this.arrowBtn) {
                 _this._createPrev();
+                _this._createNext();
             }
             if (_this.numBtn) {
                 _this._renderPageControl(data.length);
             }
         });
     },
-    // 上一页按钮
-    _createPrev: function () {
-        var _this = this,
-            controlEl = this.controlEl,
-            prev = document.createElement('span');
-        prev.className = 'prev';
-        prev.innerHTML = '上一页';
 
-        prev.addEventListener('click', function () {
-            _this.curIndex = _this.curIndex-- > 0 ? _this.curIndex : 0;
-            _this._conChange(_this.curIndex);
-        });
-
-        controlEl.append(prev);
+     // 页面改变时变化
+    _conChange: function (index) {
+        this._pageBtnStatus(index)
+        this._renderContent(index);
+        this.curIndex = index;
     },
+
     // 保存分页数据
     _dataArySave: function (data, callback) {
         var totalSize = Math.ceil(data.length / this.size),
@@ -81,11 +79,8 @@ Pagenation.prototype = {
 
         callback && callback();
     },
-    _conChange: function (index) {
-        this._pageBtnStatus(index)
-        this._renderContent(index);
-        this.curIndex = index;
-    },
+    
+
     // 分页按钮状态
     _pageBtnStatus: function (index) {
         var actClassName = this.actClassName,
@@ -98,6 +93,7 @@ Pagenation.prototype = {
     _formatPageControl: function (pageNum) {
         return pageNum + 1;
     },
+
     // 分页按钮渲染
     _renderPageControl: function (len) {
         var _this = this,
@@ -107,7 +103,7 @@ Pagenation.prototype = {
             fragment = document.createDocumentFragment(),
             element,
             i = 0;
-
+        
         for (; i < len; i++) {
             element = document.createElement('li');
             element.innerHTML = _this._formatPageControl(i);
@@ -121,6 +117,39 @@ Pagenation.prototype = {
         }
 
         controlBtn.html(fragment);
+    },
+
+    // 上一页按钮
+    _createPrev: function () {
+        var _this = this,
+            controlEl = this.controlEl,
+            prev = document.createElement('span');
+        prev.className = this.prevClassName;
+        prev.innerHTML = '上一页';
+
+        prev.addEventListener('click', function () {
+            _this.curIndex = _this.curIndex-- > 0 ? _this.curIndex : 0;
+            _this._conChange(_this.curIndex);
+        });
+
+        controlEl.append(prev);
+    },
+
+    // 下一页按钮
+    _createNext: function () {
+        var _this = this,
+            controlEl = this.controlEl,
+            prev = document.createElement('span'),
+            len = this.dataAry.length - 1;
+        prev.className = this.nextClassName;
+        prev.innerHTML = '下一页';
+
+        prev.addEventListener('click', function () {
+            _this.curIndex = _this.curIndex++ >= len ? len : _this.curIndex;
+            _this._conChange(_this.curIndex);
+        });
+
+        controlEl.append(prev);
     },
 
     // 默认渲染内容格式化
