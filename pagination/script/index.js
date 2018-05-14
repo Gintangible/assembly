@@ -11,6 +11,8 @@ var Pagenation = function (options) {
     * parma curIndex            number      当前页（数组形式）
     * parma interfacePaging     booble      是否接口分页
     */
+    this.conEl =  null;//容器盒子，必须
+    this.controlEl = null;//按钮容器
     this.dataAry = [];
     this.actClassName = 'active';
     this.prevClassName = 'prev';
@@ -29,20 +31,24 @@ var Pagenation = function (options) {
 
 Pagenation.prototype = {
     constructor: Pagenation,
+
     _analysisOptions: function (options) {
         var _this = this;
         Object.keys(options).forEach(function (k) {
             _this[k] = options[k];
         });
     },
+
     // 获取数据
     _getData: function (callback) {
         // arg1 为传递的数组 arg2为分页数（不是必须，for分页请求）
         throw new Error('must set a _getData function');
     },
+    
     // 执行
     _init: function () {
         var _this = this;
+
         this._getData(function (dataAry, pageLen) {
             _this._showInit(dataAry);
             if (_this.numBtn) {
@@ -54,6 +60,7 @@ Pagenation.prototype = {
             }
         })
     },
+
     // 显示初始化
     _showInit: function (data) {
         var _this = this;
@@ -66,6 +73,7 @@ Pagenation.prototype = {
     // 页面改变时变化
     _conChange: function (index) {
         var _this = this;
+
         // index 为当前页
         this.curIndex = index;
         if (!this.dataAry[index]) {
@@ -94,7 +102,6 @@ Pagenation.prototype = {
         callback && callback();
     },
 
-
     // 分页按钮状态
     _pageBtnStatus: function (index) {
         var actClassName = this.actClassName,
@@ -103,6 +110,7 @@ Pagenation.prototype = {
 
         controlBtn.find('li').eq(index).addClass(actClassName).siblings().removeClass(actClassName);
     },
+
     // 默认页面按钮内容格式化
     _formatPageControl: function (pageNum) {
         return pageNum + 1;
@@ -139,6 +147,7 @@ Pagenation.prototype = {
         var _this = this,
             controlEl = this.controlEl,
             prev = document.createElement('span');
+            
         prev.className = this.prevClassName;
         prev.innerHTML = '上一页';
 
@@ -156,7 +165,6 @@ Pagenation.prototype = {
             controlEl = this.controlEl,
             prev = document.createElement('span'),
             len = (len || this.dataAry.length) - 1;
-
 
         prev.className = this.nextClassName;
         prev.innerHTML = '下一页';
