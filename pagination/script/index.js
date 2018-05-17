@@ -7,20 +7,24 @@ var Pagenation = function (options) {
     * parma arrowBtn            booble      是否创建上一页下一页
     * parma prevClassName       string      按钮上一页类名
     * parma nextClassName       string      按钮下一页类名
-    * parma numBtn              booble      数字分页
+    * parma numBtn              string      数字分页 className
+    * parma pageLen             number      页的长度
     * parma curIndex            number      当前页（数组形式）
-    * parma interfacePaging     booble      是否接口分页
+    * parma interfacePaging     booble      是否是接口分页
     */
-    this.conEl =  null;//容器盒子，必须
+    this.conEl = null;//容器盒子，必须
     this.controlEl = null;//按钮容器
     this.dataAry = [];
-    this.actClassName = 'active';
-    this.prevClassName = 'prev';
-    this.nextClassName = 'next';
+    this.className = {
+        actClassName: 'active',
+        prevClassName: 'prev',
+        nextClassName: 'next'
+    };
     this.size = 10;
-    this.interfacePaging = false;
     this.arrowBtn = true;
     this.numBtn = true;
+    this.pagelen = 1;
+    this.interfacePaging = false;
     this.curIndex = 0;
     // 获取配置信息
     this._analysisOptions(options);
@@ -44,30 +48,56 @@ Pagenation.prototype = {
         // arg1 为传递的数组 arg2为分页数（不是必须，for分页请求）
         throw new Error('must set a _getData function');
     },
-    
+
     // 执行
     _init: function () {
         var _this = this;
 
-        this._getData(function (dataAry, pageLen) {
-            _this._showInit(dataAry);
-            if (_this.numBtn) {
-                _this._renderPageControl(pageLen);
-            }
-            if (_this.arrowBtn) {
-                _this._createPrev();
-                _this._createNext(pageLen);
-            }
+        this._getData(function (dataAry, setLen) {
+            _this._conInit(dataAry, setLen);
         })
     },
 
     // 显示初始化
-    _showInit: function (data) {
-        var _this = this;
+    _conInit: function (dataAry, setLen) {
+        if (setLen) {
+            this.interfacePaging = true;
+        }
+        this._dataArySave(dataAry, setLen);
+        this._create(setLen);
+        this._conChange(0);
+        
+    },
 
-        this._dataArySave(data, function () {
-            _this._conChange(_this.curIndex);
-        });
+    // 保存分页数据
+    _dataArySave: function (dataAry, setLen) {
+        this.pageLen = setLen || Math.ceil(dataAry.length / this.size);
+
+        if (!this.interfacePaging) {
+            var len = this.pageLen,
+                size = this.size,
+                i = 0;
+            for (; i < len; i++) {
+                this.dataAry.push(dataAry.slice(size * i, size * (i + 1)));
+            }
+        } else {
+            this.dataAry[this.curIndex] = dataAry;
+        }
+
+    },
+
+    // 创建
+    _create: function (setLen) {
+        if (this.numBtn) {
+            var _this = this;
+            this._createPageControl(function () {
+                _this._renderPageControl();
+            })
+        }
+        if (this.arrowBtn) {
+            this._createPrev();
+            this._createNext(setLen);
+        }
     },
 
     // 页面改变时变化
@@ -78,7 +108,8 @@ Pagenation.prototype = {
         this.curIndex = index;
         if (!this.dataAry[index]) {
             this._getData(function (dataAry) {
-                _this._showInit(dataAry);
+                _this._dataArySave(dataAry);
+                _this._conChange(index);
             });
             return;
         }
@@ -86,25 +117,9 @@ Pagenation.prototype = {
         this._renderContent(index);
     },
 
-    // 保存分页数据
-    _dataArySave: function (data, callback) {
-        if (!this.interfacePaging) {
-            var totalSize = Math.ceil(data.length / this.size),
-                size = this.size,
-                i = 0;
-            for (; i < totalSize; i++) {
-                this.dataAry.push(data.slice(size * i, size * (i + 1)));
-            }
-        } else {
-            this.dataAry[this.curIndex] = data;
-        }
-
-        callback && callback();
-    },
-
     // 分页按钮状态
     _pageBtnStatus: function (index) {
-        var actClassName = this.actClassName,
+        var actClassName = this.className.actClassName,
             controlWrapper = this.controlEl,
             controlBtn = controlWrapper.find('ul');
 
@@ -116,24 +131,34 @@ Pagenation.prototype = {
         return pageNum + 1;
     },
 
+    _createPageControl: function (callback) {
+        var controlWrapper = this.controlEl,
+            ul = document.createElement('ul');
+
+        ul.className = this.className.ulClassName;
+
+        controlWrapper.append(ul);
+
+        callback && callback();
+    },
+
     // 分页按钮渲染
-    _renderPageControl: function (len) {
+    _renderPageControl: function () {
         var _this = this,
-            actClassName = this.actClassName,
+            actClassName = this.className.actClassName,
             controlWrapper = this.controlEl,
             controlBtn = controlWrapper.find('ul'),
             fragment = document.createDocumentFragment(),
             element,
             i = 0,
-            len = len || this.dataAry.length;
-
+            len = this.pageLen;
         for (; i < len; i++) {
             element = document.createElement('li');
             element.innerHTML = _this._formatPageControl(i);
             fragment.appendChild(element);
-            $(element).addClass(i == 0 ? actClassName : "");
             (function (i) {
                 element.addEventListener('click', function () {
+                    console.log(i)
                     _this._conChange(i);
                 })
             })(i);
@@ -147,8 +172,8 @@ Pagenation.prototype = {
         var _this = this,
             controlEl = this.controlEl,
             prev = document.createElement('span');
-            
-        prev.className = this.prevClassName;
+
+        prev.className = this.className.prevClassName;
         prev.innerHTML = '上一页';
 
         prev.addEventListener('click', function () {
@@ -166,7 +191,7 @@ Pagenation.prototype = {
             prev = document.createElement('span'),
             len = (len || this.dataAry.length) - 1;
 
-        prev.className = this.nextClassName;
+        prev.className = this.className.nextClassName;
         prev.innerHTML = '下一页';
         prev.addEventListener('click', function () {
             _this.curIndex = _this.curIndex++ >= len ? len : _this.curIndex;
@@ -199,16 +224,22 @@ Pagenation.prototype = {
 var pagenation1 = new Pagenation({
     conEl: $(".page-content"),
     controlEl: $('.control-wrapper'),
+    className: {
+        actClassName: 'active',
+        nextClassName: 'next',
+        prevClassName: 'prev',
+        ulClassName: 'page-list'
+    },
     size: 2,
     interfacePaging: false,
     _getData: function (callback) {
         $.ajax({
             type: "GET",
             // url: '//gamebox.2144.cn/v1/server/list/gid/' + 92,
-            url: './data/data' + (1 || (this.curIndex + 1)) + '.json',
+            url: './data/data' + (1 && (this.curIndex + 1)) + '.json',
             // dataType: "jsonp",
             success: function (data) {
-                callback && callback(data.list);
+                callback && callback(data.list, data.total_page);
             }
         })
     },
