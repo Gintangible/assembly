@@ -3,10 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <title>back to top</title>
+    <style>
+        .wrapper{
+            width: 100px;
+            height: 3000px;
+            background: #ccc;
+        }
+        .btn{
+            position: fixed;
+            right: 200px;
+            bottom: 200px;
+            width: 100px;
+            height: 100px;
+            background: #ccc;
+        }
+    </style>
 </head>
 <body>
-    
+    <div class="wrapper"></div>
+    <button class="btn"></button>
 
     <script src='index.js'></script>
+    <script>
+        var btn = document.querySelector('.btn');
+
+        btn.onclick = function(){
+            goTop();
+        }
+    </script>
 </body>
 </html>
