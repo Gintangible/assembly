@@ -13,4 +13,4 @@
 		};
 	win.addEventListener(resizeEvt, reCalc, false);
 	doc.addEventListener('DOMContentLoaded', reCalc, false);
-})(documentwindow)
+})(document,window)
