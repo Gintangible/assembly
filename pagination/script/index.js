@@ -64,8 +64,8 @@ Pagenation.prototype = {
     },
 
     // save ary and create
-    _dataInit: function (dataAry,setLen) {
-        if( setLen ){
+    _dataInit: function (dataAry, setLen) {
+        if (setLen) {
             this.interfacePaging = true;
         }
         this.pageLen = setLen || Math.ceil(dataAry.length / this.size);
@@ -114,11 +114,11 @@ Pagenation.prototype = {
             });
             return;
         }
-        
+
         if (this.numBtn) {
             this._renderPageControl(index);
         }
-        
+
         this._renderContent(index);
     },
 
@@ -228,7 +228,7 @@ Pagenation.prototype = {
     _formatContent: function (conData) {
         var str = '';
         for (var i in conData) {
-            str += conData[i];
+            str += conData[i] + '<br/>';
         }
         return str;
     },
@@ -259,17 +259,16 @@ var pagenation1 = new Pagenation({
     size: 1,
     interfacePaging: false,
     _getData: function (callback) {
-        $.ajax({ 
+        $.ajax({
             type: "GET",
             // url: '//gamebox.2144.cn/v1/server/list/gid/' + 92,
-            url: './data/data' + (1 || (this.curIndex + 1)) + '.json',
+            url: './data/data' + (1 && (this.curIndex + 1)) + '.json',
             // dataType: "jsonp",
             success: function (data) {
-                console.log(data)
-                callback && callback(data.data.items);
+                callback && callback(data.list, data.total_page);
             }
         })
-    },
+    }
     // _formatPageControl: function (pageNum) {
     //     return pageNum + 1;
     // },
