@@ -10,10 +10,10 @@ var Pagenation = function (options) {
     * parma numBtn              string      数字分页 className
     * parma pageLen             number      页的长度
     * parma renderPageLen       number      渲染的页码长度
-    * parma curIndex            number      当前页（数组形式）
+    * parma curIndex            number      当前页
     * parma interfacePaging     booble      是否是接口分页
     */
-    this.conEl = null;//容器盒子，必须
+    this.conEl = null;//内容容器
     this.controlEl = null;//按钮容器
     this.dataAry = [];
     this.pageAry = [];
@@ -48,7 +48,6 @@ Pagenation.prototype = {
 
     // 获取数据
     _getData: function (callback) {
-        console.log(11)
         // arg1 为传递的数组 arg2为分页数（不是必须，for分页请求）
         throw new Error('must set a _getData function');
     },
@@ -58,22 +57,26 @@ Pagenation.prototype = {
         var _this = this;
 
         this._getData(function (dataAry, setLen) {
-            console.log(dataAry)
             _this._dataInit(dataAry, setLen);
         })
     },
 
     // save ary and create
     _dataInit: function (dataAry, setLen) {
-        if (setLen) {
-            this.interfacePaging = true;
-        }
-        this.pageLen = setLen || Math.ceil(dataAry.length / this.size);
+        this._getLen(dataAry.length, setLen);
 
         this._dataArySave(dataAry);
         this._pageArySave();
         this._create();
         this._render(0);
+    },
+
+    // 获取分页数
+    _getLen: function (dataLen, setLen) {
+        if (setLen) {
+            this.interfacePaging = true;
+        }
+        this.pageLen = setLen || Math.ceil(dataLen / this.size);
     },
 
     // 保存分页数据
@@ -88,52 +91,6 @@ Pagenation.prototype = {
         } else {
             this.dataAry[this.curIndex] = dataAry;
         }
-    },
-
-    // 创建
-    _create: function () {
-        if (this.numBtn) {
-            this._createPageControl();
-        }
-        if (this.arrowBtn) {
-            this._createPrev();
-            this._createNext();
-        }
-    },
-
-    // 页面改变时变化
-    _render: function (index) {
-        var _this = this;
-
-        // index 为当前页
-        this.curIndex = index;
-        if (!this.dataAry[index]) {
-            this._getData(function (dataAry) {
-                _this._dataArySave(dataAry);
-                _this._render(index);
-            });
-            return;
-        }
-
-        if (this.numBtn) {
-            this._renderPageControl(index);
-        }
-
-        this._renderContent(index);
-    },
-
-    // 默认页面按钮内容格式化
-    _formatPageControl: function (pageNum) {
-        return pageNum + 1;
-    },
-
-    _createPageControl: function () {
-        var controlWrapper = this.controlEl,
-            ul = document.createElement('ul');
-
-        ul.className = this.className.ulClassName;
-
-        controlWrapper.append(ul);
     },
 
     //分页按钮数组
@@ -155,39 +112,24 @@ Pagenation.prototype = {
         }
     },
 
-    // 分页按钮渲染 + 分页按钮状态
-    _renderPageControl: function (index) {
-        var actClassName = this.className.actClassName,
-            controlWrapper = this.controlEl,
-            controlBtn = controlWrapper.find('ul'),
-            fragment = document.createDocumentFragment(),
-            len = this.renderPageLen,
-            halfLen = Math.ceil(this.renderPageLen / 2),
-            totalLen = this.pageAry.length,
-            i = 0,
-            showI,
-            bIndex;
-        // bIndex render的start position; showI 激活位置
-
-        if (index <= halfLen - 1) {
-            showI = index;
-            bIndex = 0;
-        } else if (index >= totalLen - halfLen) {
-            showI = index % len;
-            bIndex = totalLen - len;
-        } else {
-            bIndex = index - halfLen + 1;
-            showI = halfLen - 1;
+    // 创建
+    _create: function () {
+        if (this.numBtn) {
+            this._createPageControl();
         }
-
-        for (; i < len; i++) {
-            fragment.appendChild(this.pageAry[bIndex + i]);
+        if (this.arrowBtn) {
+            this._createPrev();
+            this._createNext();
         }
+    },
 
-        controlBtn.html(fragment);
+    _createPageControl: function () {
+        var controlWrapper = this.controlEl,
+            ul = document.createElement('ul');
 
-        controlBtn.find('li').eq(showI).addClass(actClassName).siblings().removeClass(actClassName);
+        ul.className = this.className.ulClassName;
 
+        controlWrapper.append(ul);
     },
 
     // 上一页按钮
@@ -224,6 +166,68 @@ Pagenation.prototype = {
         controlEl.append(next);
     },
 
+    // 页面改变时变化
+    _render: function (index) {
+        var _this = this;
+
+        // index 为当前页
+        this.curIndex = index;
+        if (!this.dataAry[index]) {
+            this._getData(function (dataAry) {
+                _this._dataArySave(dataAry);
+                _this._render(index);
+            });
+            return;
+        }
+
+        if (this.numBtn) {
+            this._renderPageControl(index);
+        }
+
+        this._renderContent(index);
+    },
+
+    // 默认页面按钮内容格式化
+    _formatPageControl: function (pageNum) {
+        return pageNum + 1;
+    },
+
+    // 分页按钮渲染 + 分页按钮状态
+    _renderPageControl: function (index) {
+        var actClassName = this.className.actClassName,
+            controlWrapper = this.controlEl,
+            controlBtn = controlWrapper.find('ul'),
+            fragment = document.createDocumentFragment(),
+            len = this.renderPageLen,
+            halfLen = Math.ceil(this.renderPageLen / 2),
+            totalLen = this.pageAry.length,
+            i = 0,
+            showI,
+            bIndex;
+        // bIndex render的start position; showI 激活位置
+
+        if (index <= halfLen - 1) {
+            showI = index;
+            bIndex = 0;
+        } else if (index >= totalLen - halfLen) {
+            showI = index % len;
+            bIndex = totalLen - len;
+        } else {
+            bIndex = index - halfLen + 1;
+            showI = halfLen - 1;
+        }
+
+        for (; i < len; i++) {
+            fragment.appendChild(this.pageAry[bIndex + i]);
+        }
+
+        controlBtn.html(fragment);
+
+        controlBtn.find('li').eq(showI).addClass(actClassName).siblings().removeClass(actClassName);
+
+    },
+    
+
     // 默认渲染内容格式化
     _formatContent: function (conData) {
         var str = '';
@@ -247,7 +251,7 @@ Pagenation.prototype = {
     }
 }
 
-var pagenation1 = new Pagenation({
+new Pagenation({
     conEl: $(".page-content"),
     controlEl: $('.control-wrapper'),
     className: {
@@ -266,6 +270,9 @@ var pagenation1 = new Pagenation({
             // dataType: "jsonp",
             success: function (data) {
                 callback && callback(data.list, data.total_page);
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                console.log(XMLHttpRequest, textStatus, errorThrown)
             }
         })
     }
