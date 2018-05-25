@@ -17,7 +17,7 @@ var Pagenation = function (options) {
     this.controlEl = null;//按钮容器
     this.dataAry = [];
     this.pageAry = [];
-    this.renderPageLen = 3;
+    this.renderPageLen = 4;
     this.className = {
         actClassName: 'active',
         prevClassName: 'prev',
@@ -185,6 +185,7 @@ Pagenation.prototype = {
         }
 
         this._renderContent(index);
+        console.timeEnd('render');
     },
 
     // 默认页面按钮内容格式化
@@ -205,16 +206,21 @@ Pagenation.prototype = {
             showI,
             bIndex;
         // bIndex render的start position; showI 激活位置
-
-        if (index <= halfLen - 1) {
-            showI = index;
+        if (totalLen <= len) {
+            console.log("totalLen < len")
             bIndex = 0;
-        } else if (index >= totalLen - halfLen) {
-            showI = index % len;
-            bIndex = totalLen - len;
+            len = totalLen;
         } else {
-            bIndex = index - halfLen + 1;
-            showI = halfLen - 1;
+            if (index <= halfLen - 1) {
+                showI = index;
+                bIndex = 0;
+            } else if (index >= totalLen - halfLen - 1) {
+                showI = len - (totalLen - index);
+                bIndex = totalLen - len;
+            } else {
+                bIndex = index - halfLen + 1;
+                showI = halfLen - 1;
+            }
         }
 
         for (; i < len; i++) {
@@ -226,7 +232,7 @@ Pagenation.prototype = {
         controlBtn.find('li').eq(showI).addClass(actClassName).siblings().removeClass(actClassName);
 
     },
-    
+
 
     // 默认渲染内容格式化
     _formatContent: function (conData) {
@@ -265,11 +271,13 @@ new Pagenation({
     _getData: function (callback) {
         $.ajax({
             type: "GET",
-            // url: '//gamebox.2144.cn/v1/server/list/gid/' + 92,
             url: './data/data' + (1 && (this.curIndex + 1)) + '.json',
+            // url: '//gamebox.2144.cn/v1/server/list/gid/' + 92,
             // dataType: "jsonp",
             success: function (data) {
-                callback && callback(data.list, data.total_page);
+                console.time('render');
+                callback && callback(data.list);
+                // callback && callback(data.data.items);
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
                 console.log(XMLHttpRequest, textStatus, errorThrown)
