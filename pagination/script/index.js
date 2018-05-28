@@ -18,11 +18,13 @@ var Pagenation = function (options) {
     this.dataAry = [];
     this.pageAry = [];
     this.renderPageLen = 4;
-    this.className = {
-        actClassName: 'active',
-        prevClassName: 'prev',
-        nextClassName: 'next'
-    };
+
+    this.actCls = 'active';
+    this.prevCls = 'prev';
+    this.nextCls = 'next';
+    this.ulCls = 'page-list';
+
+
     this.size = 10;
     this.arrowBtn = true;
     this.numBtn = true;
@@ -127,7 +129,7 @@ Pagenation.prototype = {
         var controlWrapper = this.controlEl,
             ul = document.createElement('ul');
 
-        ul.className = this.className.ulClassName;
+        ul.className = this.ulCls;
 
         controlWrapper.append(ul);
     },
@@ -138,7 +140,7 @@ Pagenation.prototype = {
             controlEl = this.controlEl,
             prev = document.createElement('span');
 
-        prev.className = this.className.prevClassName;
+        prev.className = this.prevCls;
         prev.innerHTML = '上一页';
 
         prev.addEventListener('click', function () {
@@ -156,7 +158,7 @@ Pagenation.prototype = {
             next = document.createElement('span'),
             len = this.pageLen - 1;
 
-        next.className = this.className.nextClassName;
+        next.className = this.nextCls;
         next.innerHTML = '下一页';
         next.addEventListener('click', function () {
             _this.curIndex = _this.curIndex++ >= len ? len : _this.curIndex;
@@ -195,7 +197,7 @@ Pagenation.prototype = {
 
     // 分页按钮渲染 + 分页按钮状态
     _renderPageControl: function (index) {
-        var actClassName = this.className.actClassName,
+        var actClassName = this.actCls,
             controlWrapper = this.controlEl,
             controlBtn = controlWrapper.find('ul'),
             fragment = document.createDocumentFragment(),
@@ -207,7 +209,6 @@ Pagenation.prototype = {
             bIndex;
         // bIndex render的start position; showI 激活位置
         if (totalLen <= len) {
-            console.log("totalLen < len")
             bIndex = 0;
             len = totalLen;
         } else {
@@ -260,12 +261,7 @@ Pagenation.prototype = {
 new Pagenation({
     conEl: $(".page-content"),
     controlEl: $('.control-wrapper'),
-    className: {
-        actClassName: 'active',
-        nextClassName: 'next',
-        prevClassName: 'prev',
-        ulClassName: 'page-list'
-    },
+    ulCls: 'page-list',
     size: 1,
     interfacePaging: false,
     _getData: function (callback) {
