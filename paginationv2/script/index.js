@@ -41,7 +41,7 @@ var Pagenation = function (options) {
     this.curIndex = 0;//当前页
 
     // 分页按钮显示方式
-    this.mode = 'all';
+    this.mode = 'default';
 
     // 是否是接口分页请求
     this.interface = false;
@@ -82,9 +82,10 @@ Pagenation.prototype = {
         this._getLen(dataAry.length, setLen);
 
         this._dataArySave(dataAry);
-        this._pageArySave();
         this._createElement();
         this._render(0);
+
+        this._bindEvent();
     },
 
     // 获取分页数
@@ -110,31 +111,6 @@ Pagenation.prototype = {
         }
     },
 
-    //分页按钮数组
-    _pageArySave: function () {
-        var _this = this,
-            element,
-            i = 0,
-            len = this.pageCount,
-            activeCls = this.activeCls;
-
-        for (; i < len; i++) {
-            element = document.createElement('li');
-            a = document.createElement('a');
-            element.appendChild(a);
-            a.innerHTML = _this._formatPageControl(i);
-            this.pageAry.push(element);
-            (function (i) {
-                a.addEventListener('click', function () {
-                    if (this.className.indexOf(activeCls) > -1) {
-                        return;
-                    }
-                    _this._render(i);
-                })
-            })(i);
-        }
-    },
-
     // 创建
     _createElement: function () {
         if (this.showPN) {
@@ -157,6 +133,8 @@ Pagenation.prototype = {
         ul.className = this.ulCls;
 
         pageBox.append(ul);
+
+        this._pageInit();
     },
 
     // 上一页按钮
@@ -267,79 +245,96 @@ Pagenation.prototype = {
 
     // 默认页面按钮内容格式化
     _formatPageControl: function (pageNum) {
-        return pageNum + 1;
+        return '<a>' + (pageNum + 1) + '</a>';
+    },
+
+    // page显示mode
+    _pageInit: function () {
+        var pageBox = this.pageBox,
+            btnBox = pageBox.find('ul'),
+            pageCount = this.pageCount,
+            str = '';
+
+        if (this.mode === 'default') {
+            for (var i = 0; i < pageCount; i++) {
+                str += '<li>' + this._formatPageControl(i) + '</li>';
+            }
+        }
+
+        btnBox.html(str);
     },
 
     // 分页按钮渲染 + 分页按钮状态
     _renderPageControl: function (index) {
-        var actClassName = this.activeCls,
-            pageBox = this.pageBox,
+        var pageBox = this.pageBox,
             btnBox = pageBox.find('ul'),
-            fragment = document.createDocumentFragment(),
-            len = this.showPageCount,
-            totalLen = this.pageAry.length,
-            i = 0,
-            showI = index,
-            bIndex = 0;
+            pageCount = this.pageCount
 
         switch (this.mode) {
-            case 'all':
-                len = totalLen;
-                bIndex = 0;
-                for (; i < len; i++) {
-                    fragment.appendChild(this.pageAry[bIndex + i]);
-                }
-                break;
             case 'fixed':
-                var halfLen = Math.ceil(len / 2);
-                // bIndex render的start position; showI 激活位置
-                if (totalLen <= len) {
-                    bIndex = 0;
-                    len = totalLen;
+                var showLen = this.showPageCount,
+                    halfLen = Math.ceil(showLen / 2),
+                    i = 0,
+                    str = '';
+                // i render的start position; showI 激活位置
+                if (pageCount <= showLen) {
+                    showLen = pageCount;
                 } else {
-                    if (index <= halfLen - 1) {
-                        showI = index;
-                        bIndex = 0;
-                    } else if (index >= totalLen - halfLen - 1) {
-                        showI = len - (totalLen - index);
-                        bIndex = totalLen - len;
+                    // index = index  index <= halfLen - 1
+                    if (index >= pageCount - halfLen - 1) {
+                        index = showLen - (pageCount - index);
+                        i = pageCount - len;
                     } else {
-                        bIndex = index - halfLen + 1;
-                        showI = halfLen - 1;
+                        i = index - halfLen + 1;
+                        index = halfLen - 1;
                     }
                 }
-                for (; i < len; i++) {
-                    fragment.appendChild(this.pageAry[bIndex + i]);
+                for (; i < showLen; i++) {
+                    str += '<li>' + this._formatPageControl(i) + '</li>';
                 }
 
+                btnBox.html(str);
                 break;
-            case 'unfixed':
+            case 'unfixed': //...
+                break;
+            case 'personDesign':
+                this._personDesign(this.pageCount);
                 break;
             default:
                 break;
         }
 
-        btnBox.html(fragment);
 
-        this._btnStatus(showI);
+        this._btnStatus(index);
 
     },
 
     // 按钮状态
     _btnStatus: function (index) {
-        var actClassName = this.activeCls,
+        var activeCls = this.activeCls,
             pageBox = this.pageBox,
-            btnBox = pageBox.find('ul'),
-            as = btnBox.find('a'),
+            as = pageBox.find('ul a'),
             i = 0,
             len = as.length;
 
         for (; i < len; i++) {
-            as.eq(i).removeClass(actClassName)
+            as.eq(i).removeClass(activeCls).removeAttr('disabled');
         }
 
 
-        as.eq(index).addClass(actClassName);
+        as.eq(index).addClass(activeCls).attr('disabled', true);
+    },
+
+    _bindEvent: function () {
+        var _this = this,
+            activeCls = this.activeCls,
+            pageBox = this.pageBox,
+            as = pageBox.find('ul a');
+
+        as.on('click', function () {
+            if (this.className.indexOf(activeCls) > -1) return;
+            _this._render(this.innerText);
+        })
     },
 
 
@@ -372,17 +367,17 @@ new Pagenation({
     pageBox: $('.control-wrapper'),
     ulCls: 'page-list',
     showDataCount: 1,
-    mode: 'fixed',
+    // mode: 'fixed',
     _getData: function (callback) {
         $.ajax({
             type: "GET",
-            url: './data/data' + (1 && (this.curIndex + 1)) + '.json',
+            url: './data/data' + (1 || (this.curIndex + 1)) + '.json',
             // url: '//gamebox.2144.cn/v1/server/list/gid/' + 92,
             // dataType: "jsonp",
             success: function (data) {
                 // console.time('render');
-                // callback && callback(data.list);
-                callback && callback(data.list, data.total_page);
+                callback && callback(data.list);
+                // callback && callback(data.list, data.total_page);
                 // callback && callback(data.data.items);
             },
             error: function (XMLHttpRequest, textStatus, errorThrown) {
