@@ -31,8 +31,30 @@
     <script src="script/jquery-3.2.1.js"></script>
     <script src='script/index.js'></script>
     <script>
-        
-        
+        new Pagenation({
+            conBox: $(".page-content"),
+            pageBox: $('.control-wrapper'),
+            ulCls: 'page-list',
+            showDataCount: 1,
+            mode: 'unfixed',
+            _getData: function (callback) {
+                $.ajax({
+                    type: "GET",
+                    url: './data/data' + (1 || (this.curIndex + 1)) + '.json',
+                    // url: '//gamebox.2144.cn/v1/server/list/gid/' + 92,
+                    // dataType: "jsonp",
+                    success: function (data) {
+                        // console.time('render');
+                        callback && callback(data.list);
+                        // callback && callback(data.list, data.total_page);
+                        // callback && callback(data.data.items);
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        console.log(XMLHttpRequest, textStatus, errorThrown)
+                    }
+                })
+            }
+        })
 
     </script>
 </body>

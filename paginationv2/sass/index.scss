@@ -40,18 +40,15 @@ body{
                 line-height: 32px;
                 @extend %cp;
                 color: #666;
-                a{
-                    @extend %db;
-                    padding: 0 10px;
-                    font-size: 12px;
-                    border: 1px solid #e1e1e1;
-                    border-radius: 5px;
-                    transition: color .3s,border .3s;
-                    &:hover,&.active{
-                        color: #fff;
-                        background: #0cacff;
-                        border-color: #0cacff;
-                    }
+                padding: 0 10px;
+                font-size: 12px;
+                border: 1px solid #e1e1e1;
+                border-radius: 5px;
+                transition: color .3s,border .3s;
+                &:hover,&.active{
+                    color: #fff;
+                    background: #0cacff;
+                    border-color: #0cacff;
                 }
             }
         }

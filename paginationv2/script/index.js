@@ -37,7 +37,7 @@ var Pagenation = function (options) {
     // 页码相关
     this.showDataCount = 10;//每页内容数
     this.pageCount = 10;//页数
-    this.showPageCount = 4;//显示页码按钮数
+    this.showPageCount = 5;//显示页码按钮数
     this.curIndex = 0;//当前页
 
     // 分页按钮显示方式
@@ -134,7 +134,13 @@ Pagenation.prototype = {
 
         pageBox.append(ul);
 
-        this._pageInit();
+        if (this.showPageCount > this.pageCount) {
+            this.mode = 'default';
+        }
+
+        if (this.mode == 'default') {
+            this._pageDefault();
+        }
     },
 
     // 上一页按钮
@@ -235,30 +241,28 @@ Pagenation.prototype = {
             return;
         }
 
-        if (this.showPN) {
-            this._renderPageControl(index);
-        }
+        this._renderPageControl(index);
 
         this._renderContent(index);
+
+        typeof this._personEvents === 'function' && this._personEvents(this.curIndex, this.pageCount, this.dataAry);
 
     },
 
     // 默认页面按钮内容格式化
     _formatPageControl: function (pageNum) {
-        return '<a>' + (pageNum + 1) + '</a>';
+        return pageNum + 1;
     },
 
     // page显示mode
-    _pageInit: function () {
+    _pageDefault: function () {
         var pageBox = this.pageBox,
             btnBox = pageBox.find('ul'),
             pageCount = this.pageCount,
             str = '';
 
-        if (this.mode === 'default') {
-            for (var i = 0; i < pageCount; i++) {
-                str += '<li>' + this._formatPageControl(i) + '</li>';
-            }
+        for (var i = 0; i < pageCount; i++) {
+            str += '<li data-page=' + i + '>' + this._formatPageControl(i) + '</li>';
         }
 
         btnBox.html(str);
@@ -266,6 +270,8 @@ Pagenation.prototype = {
 
     // 分页按钮渲染 + 分页按钮状态
     _renderPageControl: function (index) {
+
+        if (!this.showPN) return;
         var pageBox = this.pageBox,
             btnBox = pageBox.find('ul'),
             pageCount = this.pageCount
@@ -275,27 +281,72 @@ Pagenation.prototype = {
                 var showLen = this.showPageCount,
                     halfLen = Math.ceil(showLen / 2),
                     i = 0,
-                    str = '';
-                // i render的start position; showI 激活位置
-                if (pageCount <= showLen) {
-                    showLen = pageCount;
+                    str = '',
+                    startI = 0;
+
+                // startI render的start position;
+
+                if (index <= halfLen - 1) {
+                    startI = 0;
+                } else if (index >= pageCount - halfLen - 1) {
+                    startI = pageCount - showLen;
+                    index = showLen - (pageCount - index);
                 } else {
-                    // index = index  index <= halfLen - 1
-                    if (index >= pageCount - halfLen - 1) {
-                        index = showLen - (pageCount - index);
-                        i = pageCount - len;
-                    } else {
-                        i = index - halfLen + 1;
-                        index = halfLen - 1;
-                    }
+                    startI = index - halfLen + 1;
+                    index = halfLen - 1;
                 }
+
                 for (; i < showLen; i++) {
-                    str += '<li>' + this._formatPageControl(i) + '</li>';
+                    str += '<li data-page=' + (startI + i) + '>' + this._formatPageControl((startI + i)) + '</li>';
                 }
 
                 btnBox.html(str);
+
+                this._bindEvent();
+
                 break;
             case 'unfixed': //...
+                var showLen = this.showPageCount,//显示长度
+                    halfLen = Math.floor(showLen / 2),
+                    centerLen = this.centerLen || 3,
+                    startLen = parseInt((showLen - centerLen) / 2),
+                    str = '',
+                    centerStr = '<li>...</li>',
+                    i = 0;
+
+                if (index < showLen - 2) {//头部
+                    var str = '';
+                    for (var i = 0; i < showLen - 1; i++) {
+                        str += '<li data-page=' + i + '>' + this._formatPageControl(i) + '</li>';
+                    }
+                    str += centerStr + '<li data-page=' + (showLen - 1) + '>' + this._formatPageControl(showLen - 1) + '</li>';
+                } else if (index >= pageCount - showLen) {// 尾部
+                    var str = '';
+                    str += '<li data-page=' + 0 + '>' + this._formatPageControl(0) + '</li>' + centerStr;
+                    for (var i = 0; i < showLen - 1; i++) {
+                        var num = pageCount - showLen + i;
+                        str += '<li data-page=' + num + '>' + this._formatPageControl(num) + '</li>';
+                    }
+                } else {// 中间
+                    if (index > halfLen) {
+                        for (var i = 0; i < halfLen - 1; i++) {
+                            str += '<li data-page=' + i + '>' + this._formatPageControl(i) + '</li>';
+                        }
+                    }
+
+                    for (var i = 0; i < centerLen; i++) {
+                        var num = +index + i - centerLen / 2
+                        str += '<li data-page=' + num + '>' + this._formatPageControl(num) + '</li>';
+                    }
+                }
+
+
+
+
+                btnBox.html(str);
+
+                this._bindEvent();
+
                 break;
             case 'personDesign':
                 this._personDesign(this.pageCount);
@@ -313,30 +364,33 @@ Pagenation.prototype = {
     _btnStatus: function (index) {
         var activeCls = this.activeCls,
             pageBox = this.pageBox,
-            as = pageBox.find('ul a'),
+            as = pageBox.find('ul li'),
             i = 0,
             len = as.length;
 
         for (; i < len; i++) {
-            as.eq(i).removeClass(activeCls).removeAttr('disabled');
+            as.eq(i).removeClass(activeCls);
         }
 
-
-        as.eq(index).addClass(activeCls).attr('disabled', true);
+        as.eq(index).addClass(activeCls);
     },
 
     _bindEvent: function () {
         var _this = this,
             activeCls = this.activeCls,
             pageBox = this.pageBox,
-            as = pageBox.find('ul a');
-
+            as = pageBox.find('ul li');
         as.on('click', function () {
+            var index = this.getAttribute('data-page');
             if (this.className.indexOf(activeCls) > -1) return;
-            _this._render(this.innerText);
+            index && _this._render(index);
         })
     },
 
+    // 定制事件
+    _personEvents: function (index, pageCount, data) {
+        console.warn('定制事件（内容）：' + '当前页：' + index + '；总页页：' + pageCount + '；当前页内容：', data);
+    },
 
     // 默认渲染内容格式化
     _formatContent: function (conData) {
@@ -361,34 +415,3 @@ Pagenation.prototype = {
         conBox.html(str);
     }
 }
-
-new Pagenation({
-    conBox: $(".page-content"),
-    pageBox: $('.control-wrapper'),
-    ulCls: 'page-list',
-    showDataCount: 1,
-    // mode: 'fixed',
-    _getData: function (callback) {
-        $.ajax({
-            type: "GET",
-            url: './data/data' + (1 || (this.curIndex + 1)) + '.json',
-            // url: '//gamebox.2144.cn/v1/server/list/gid/' + 92,
-            // dataType: "jsonp",
-            success: function (data) {
-                // console.time('render');
-                callback && callback(data.list);
-                // callback && callback(data.list, data.total_page);
-                // callback && callback(data.data.items);
-            },
-            error: function (XMLHttpRequest, textStatus, errorThrown) {
-                console.log(XMLHttpRequest, textStatus, errorThrown)
-            }
-        })
-    }
-    // _formatPageControl: function (pageNum) {
-    //     return pageNum + 1;
-    // },
-    // _formatContent: function (data) {
-    //     return data.game_name + '<br/>';
-    // }
-})
