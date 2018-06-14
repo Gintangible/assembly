@@ -5,7 +5,7 @@
  *        original : 'data-original',
  *    });
  */
-lazyload = function(ele, config) {
+lazyload = function (ele, config) {
     var doc = document,
         doc_body = doc.body || doc.documentElement,
         ele = ele || doc, //lazy加载父级容器
@@ -16,7 +16,6 @@ lazyload = function(ele, config) {
         },
         imgAry = [], //lazy元素数组
         lazyNum = 0, //已加载的数量
-        heightAry = [], //图片高度的数组集合
         original = config.original,
         distance = config.distance, //lazy加载距离
         effect = config.effect;
@@ -30,11 +29,12 @@ lazyload = function(ele, config) {
                 ele: imgs[i],
                 top: getEleTop(imgs[i])
             });
+            lazyNum++;
         }
     }
 
     function loader() {
-        if (!imgAry.length) return;
+        if (!lazyNum) return;
 
         var getScrollTop = doc_body.scrollTop,
             height = doc_body.clientHeight, //显示窗口页面高度
@@ -43,14 +43,14 @@ lazyload = function(ele, config) {
             i = 0,
             len = imgAry.length;
         for (; i < len; i++) {
-            var img = imgAry[i],
-                ele = img.ele;
-            if (imgShowHeight > img.top && ele.getAttribute(original)) { //已加载图片，中断scroll事件
+            var img = imgAry[i];
+            ele = img.ele;
+            if (imgShowHeight > img.top || ele.getAttribute(original)) { //已加载图片，中断scroll事件
                 ele.src = ele.getAttribute(original);
                 ele.removeAttribute(original);
                 effect && ele.effect; //是否用动画
 
-                // imgAry.splice(0, 1);
+                lazyNum--;
             }
         }
 
