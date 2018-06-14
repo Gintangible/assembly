@@ -1,4 +1,6 @@
-﻿var Slider = function( options ){
+﻿// banner
+
+var Slider = function( options ){
     var noop = function () {};
 
     $.extend( this, {

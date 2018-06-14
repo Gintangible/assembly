@@ -1,3 +1,5 @@
+// scroll to top
+
 function goTop(speed, time) {
     // 默认参数传递
     // 速率（默认1）

@@ -1,3 +1,4 @@
+// parse url
 var parseURL = function() {
 	var cache = {};
 	return function(url){

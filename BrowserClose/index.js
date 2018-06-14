@@ -1,3 +1,5 @@
+//browser Title
+
 var titAnimationFn = function () {
     var msg = document.title + '   ',
         titAnimation = function () {
