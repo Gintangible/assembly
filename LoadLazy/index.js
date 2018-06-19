@@ -28,7 +28,8 @@ lazyload = function(ele, config) {
         for (i = 0; i < len; i++) {
             imgAry.push({
                 ele: imgs[i],
-                top: getEleTop(imgs[i])
+                top: getEleTop(imgs[i]),
+                isLoad: false
             });
         }
     }
@@ -42,15 +43,15 @@ lazyload = function(ele, config) {
             imgShowHeight = distance + downScrollTop, //图片显示的高度
             i = 0,
             len = imgAry.length;
+            
         for (; i < len; i++) {
             var img = imgAry[i],
                 ele = img.ele;
-            if (imgShowHeight > img.top && ele.getAttribute(original)) { //已加载图片，中断scroll事件
+            if (imgShowHeight > img.top && !img.isLoad) { //已加载图片，中断scroll事件
                 ele.src = ele.getAttribute(original);
                 ele.removeAttribute(original);
+                img.isLoad = true;
                 effect && ele.effect; //是否用动画
-
-                // imgAry.splice(0, 1);
             }
         }
 
