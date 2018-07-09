@@ -16,7 +16,6 @@ lazyload = function(ele, config) {
         },
         imgAry = [], //lazy元素数组
         lazyNum = 0, //已加载的数量
-        heightAry = [], //图片高度的数组集合
         original = config.original,
         distance = config.distance, //lazy加载距离
         effect = config.effect;
@@ -31,11 +30,12 @@ lazyload = function(ele, config) {
                 top: getEleTop(imgs[i]),
                 isLoad: false
             });
+            lazyNum++;
         }
     }
 
     function loader() {
-        if (!imgAry.length) return;
+        if (!lazyNum) return;
 
         var getScrollTop = doc_body.scrollTop,
             height = doc_body.clientHeight, //显示窗口页面高度
@@ -43,18 +43,24 @@ lazyload = function(ele, config) {
             imgShowHeight = distance + downScrollTop, //图片显示的高度
             i = 0,
             len = imgAry.length;
-            
+
         for (; i < len; i++) {
             var img = imgAry[i],
                 ele = img.ele;
             if (imgShowHeight > img.top && !img.isLoad) { //已加载图片，中断scroll事件
-                ele.src = ele.getAttribute(original);
-                ele.removeAttribute(original);
-                img.isLoad = true;
-                effect && ele.effect; //是否用动画
-            }
-        }
+                var img = imgAry[i];
+                ele = img.ele;
+                if (imgShowHeight > img.top || ele.getAttribute(original)) { //已加载图片，中断scroll事件
+                    ele.src = ele.getAttribute(original);
+                    ele.removeAttribute(original);
+                    img.isLoad = true;
+                    effect && ele.effect; //是否用动画
 
+                    lazyNum--;
+                }
+            }
+
+        }
     }
 
     function getEleTop(element) { //获取元素到页面顶部距离
