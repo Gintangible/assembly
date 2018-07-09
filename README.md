@@ -19,6 +19,7 @@
 
 ## L\~M\~N
 > lottery                          => 抽奖
+> loadLazy                         => 懒加载
 
 > noselect                         => 页面不可选
 
