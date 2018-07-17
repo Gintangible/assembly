@@ -37,8 +37,8 @@ lazyload = function(ele, config) {
     function loader() {
         if (!lazyNum) return;
 
-        var getScrollTop = doc_body.scrollTop,
-            height = doc_body.clientHeight, //显示窗口页面高度
+        var getScrollTop = window.scrollY,
+            height = window.innerHeight, //显示窗口页面高度
             downScrollTop = getScrollTop + height, //页面底部到页面顶部的距离
             imgShowHeight = distance + downScrollTop, //图片显示的高度
             i = 0,
@@ -50,14 +50,14 @@ lazyload = function(ele, config) {
             if (imgShowHeight > img.top && !img.isLoad) { //已加载图片，中断scroll事件
                 var img = imgAry[i];
                 ele = img.ele;
-                if (imgShowHeight > img.top || ele.getAttribute(original)) { //已加载图片，中断scroll事件
-                    ele.src = ele.getAttribute(original);
-                    ele.removeAttribute(original);
-                    img.isLoad = true;
-                    effect && ele.effect; //是否用动画
+                // if (imgShowHeight > img.top || ele.getAttribute(original)) {} //已加载图片，中断scroll事件
+                ele.src = ele.getAttribute(original);
+                ele.removeAttribute(original);
+                img.isLoad = true;
+                effect && ele.effect; //是否用动画
 
-                    lazyNum--;
-                }
+                lazyNum--;
+
             }
 
         }

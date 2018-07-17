@@ -1,18 +1,12 @@
-var ScrollBar = function(options){
-  this.el = options.el;
+class ScrollBar {
+    constructor(config) {
+        this.el = config.el;
+    }
+    create(){
+       
+    }
 
 }
-
-ScrollBar.prototype = {
-  constructor: ScrollBar,
-
-  
-  create: function(){
-    
-  }
-}
-
-
 
 
 
