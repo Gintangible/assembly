@@ -1,14 +1,21 @@
 ;
 (function (doc) {
     var Paganation = function (el, options) {
+        /*
+        * baseUrl   string  跳转链接(*)
+        * curPage   number  当前页(*)
+        * totalPage number  总页数(*)
+        * arrow     boolean 是否有上下页
+        * showLen   number  显示的按钮个数
+        */
         this.el = el;
+        this.prev=  '';
+        this.next=  '';
         let baseOptions = Object.assign({
             baseUrl: "/",
             curPage: 1,
             totalPage: 100,
             arrow: true,
-            prev: '',
-            next: '',
             showLen: 10
         }, options);
 

@@ -1,16 +1,26 @@
 ;
 (function (doc) {
     var Paganation = function (el, options) {
-        this.el = el;
+        /*
+         * curIndex      number  当前页(*)
+         * dataAry       number  分页数组
+         * data          array   需分页的数据
+         * showDataCount number  每页显示数
+         * arrow         boolean 是否有上下页
+         * showLen       number  显示的按钮个数
+         * cur           string  按钮激活类名
+         */
         let baseOptions = Object.assign({
-            curIndex: 0,
             arrow: true,
             data: '',
-            dataAry: [],
             showDataCount: 1,
             showLen: 10,
             cur: 'cur'
         }, options);
+
+        this.el = el;
+        this.dataAry = [];
+        this.curIndex = 0;
 
         this._init(baseOptions);
     };
