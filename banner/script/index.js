@@ -3,6 +3,7 @@
 var Slider = function( options ){
     var noop = function () {};
 
+
     $.extend( this, {
         element: null,
         prefix : '',

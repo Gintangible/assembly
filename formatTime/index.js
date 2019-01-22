@@ -1,10 +1,8 @@
 // 5 -> 05
-// 2018-06-17 23:59:59 -> 2018年6月17日23:59
-
-
 var formatNum = function(num) {
     return (0..toFixed(2) + num).slice(-2);
 };
+// 2018-06-17 23:59:59 -> 2018年6月17日23:59
 
 var formatTime = function(time) {
     var time = new Date(time.replace(/-/g, "/")),
