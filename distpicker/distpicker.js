@@ -1,35 +1,50 @@
 (function () {
     var Distpicker = function (el, options) {
         this.el = el;
+        /*  autoSelect          Boolean     自动选择,第一个
+         *   placeholder         Boolean     设置的默认值
+         *   province            String      一级默认值
+         *   city                String      二级默认值
+         *   district            String      三级默认值
+         *   dataJson            Object      三级联动的数据
+         *   dataCode            string      三级联动的起始key
+         */
+        //  default 单独设置，不然会替代，导致设置地址时，再切换地址，会把设置的地址带上
+        this.default = {
+            province: '—— 省 ——',
+            city: '—— 市 ——',
+            district: '—— 区 ——'
+        };
+
         this.options = Object.assign({
             autoSelect: true,
             placeholder: true,
-            province: '—— 省 ——',
-            city: '—— 市 ——',
-            district: '—— 区 ——',
             dataJson: ChineseDistricts || {},
             dataCode: '86' //起始code
-        }, options);
+        }, this.default, options);
 
         this.province = 'province';
         this.city = 'city';
         this.district = 'district';
 
-        this.saveData = [];
+        // 缓存数据html
+        this.saveData = {};
         this._init();
     }
 
     Distpicker.prototype = {
-
         contructor: Distpicker,
 
         _init: function () {
+            if (!this.el.nodeName) {
+                throw new TypeError('el must be 原生')
+            }
             const self = this;
-            const opitons = this.options;
             const $select = this.el.querySelectorAll('select');
+            const types = [this.province, this.city, this.district];
 
-            [this.province, this.city, this.district].forEach((item, i) => {
-                self['$' + item] = $select[i];
+            $select.forEach((item, i) => {
+                self['$' + types[i]] = item;
             })
 
             this._bind();
@@ -69,8 +84,10 @@
         output: function (type) {
             const curSelect = this['$' + type];
             const options = this.options;
+            const placeholder = options.placeholder;
             let data = [];
-
+            const value = options[type];
+            let matched; //匹配到设置默认值
             if (!curSelect) return;
 
             const code = (
@@ -79,26 +96,43 @@
                 type === this.district ? this.$city && this._getSelectCode(this.$city) : ""
             );
 
-            if (this.saveData[code]) {
-
-            } else {
+            // 本地缓存node
+            var item = this.saveData[code],
+                node = item && item.element;
+            if (!node) {
                 const datalist = code ? options.dataJson[code] : null;
                 if (datalist) {
                     for (var i in datalist) {
+                        var selected = datalist[i] === value;
+                        if (selected) matched = true;
                         data.push({
                             code: i,
                             address: datalist[i],
-                            // selected: selected
+                            selected: selected
                         })
                     }
-                    this.saveData.push({
-                        code: this._getList(data)
-                    })
+                };
+                // Add placeholder option
+                // 非设置时，自动填充第一个
+                if (options.autoSelect && !matched) {
+                    data[0].selected = true;
                 }
+
+                if (placeholder) {
+                    data.unshift({
+                        code: '',
+                        address: this.default[type],
+                        selected: false
+                    });
+                }
+
+                node = this._getList(data);
+                this.saveData[code] = {
+                    element: node
+                };
             }
 
-
-            curSelect.innerHTML = this.saveData[code];
+            curSelect.innerHTML = node;
         },
 
         _getSelectCode: function (el) {
@@ -127,26 +161,24 @@
         },
 
         // 重置
-        reset: function (deep) {
-            if (!deep) {
-                this.output(this.province);
-                this.output(this.city);
-                this.output(this.district);
-            } else if (this.$province) {
-                this.$province.find(':first').prop('selected', true).trigger(EVENT_CHANGE);
-            }
+        reset: function () {
+            this.output(this.province);
+            this.output(this.city);
+            this.output(this.district);
         },
 
         // 销毁
         destroy: function () {
             this.unbind();
-            this.$element.removeData(NAMESPACE);
         }
 
     }
 
     new Distpicker(document.querySelector('.industry-wrap'), {
-        data: ChineseDistricts
-    })
-    // window.Distpicker = Distpicker;
-})()
+        dataJson: ChineseDistricts,
+        province: "浙江省",
+        city: "杭州市",
+        district: "西湖区"
+    });
+    window.Distpicker = Distpicker;
+})();
