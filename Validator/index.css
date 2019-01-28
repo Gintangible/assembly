@@ -1,4 +1,4 @@
-    body {
+body {
     padding: 50px 100px;
     font-family: Microsoft Yahei, Arial;
     font-size: 14px;
@@ -30,6 +30,16 @@ form {
     outline: none;
     font-size: 14px;
     border-radius: 5px;
+}
+
+.form_group input.success {
+    border-color: #32b16c;
+    box-shadow: 0 0 4px #32b16c;
+}
+
+.form_group input.error {
+    border-color: #f00;
+    box-shadow: 0 0 4px #f00;
 }
 
 .form_group p.message {
@@ -75,3 +85,4 @@ form {
     box-shadow: 0 0 0 1px transparent inset, 0 0 0 0 rgba(34, 36, 38, .15) inset;
     background: #3498db;
     color: #fff;
+}

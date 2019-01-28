@@ -1,456 +1,219 @@
 ;
 (function () {;
-    (function () {
-        function nameValidata(name) {
-            console.log(name);
+    function nameValidate(name) {
+        return name.length > 6;
+    }
+    /**
+     * validate email
+     * @param email
+     * @returns {boolean}
+     */
+    function emailValidate(email) {
+        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        return re.test(email)
+    }
+
+    function phoneValidate(phone) {
+        const re = /^1[34578]\d{9}$/;
+        return re.test(phone)
+    }
+
+
+    var Validate = function (options) {
+        /*
+         *   single             Boolean         是否开启单个验证
+         *   singleEvent        String          单个验证的事件类型
+         *   verifyArray        [{
+                                    target: '#name', // 检查的 input
+                                    type: 'name',    //  用于保存数据，（提交的key）
+                                    required: true,  // 必填
+                                    // 提示
+                                    message: {
+                                        target: '.name p', // 检查结果信息展示的地方
+                                        success: '名称可用' // 成功时显示
+                                        error: '名称不可用'
+                                    },
+                                    validator: nameValidate
+         *                      ]              验证器数组
+         *   isSaveData         Boolean         是否返回input val
+         *   successClass       String          返回成功的class
+         *   errorClass         String          返回失败的class
+         */
+        this.DEFATLTOPTIONS = {
+            single: true,
+            singleEvent: 'blur',
+            verifyArray: [],
+            successClass: 'success',
+            errorClass: 'error',
+            isSaveData: true
         }
 
-        function nameValidata(email) {
-            console.log(email);
-        }
+        this.options = Object.assign(this.DEFATLTOPTIONS, options);
 
-        function phoneValidata(phone) {
-            console.log(phone);
-        }
+        // 必填的长度
+        this.required = 0;
 
+        // 返回的数组
+        this.dataAry = {}
 
-        var Validator = function (options) {
-            /*
-             *   single          Boolean         是否开启单个验证
-             *   singleEvent     String          单个验证的事件类型
-             *   verifyArray     []              验证器数组
-             */
-            this.DEFATLTOPTIONS = {
-                single: true,
-                singleEvent: 'blur',
-                verifyArray: []
+        this._init();
+    };
+
+    Validate.prototype = {
+        constructor: Validate,
+
+        _init: function () {
+            this.options.single && this._run();
+        },
+
+        // 验证 单个input
+        _check(item) {
+            /* {
+            target: '#name', // 检查的 input
+            required: true,
+            message: {
+                target: '.name p', // 检查结果信息展示的地方
+                placeholder: '必填，长度为4~16个字符',
+                success: '名称可用' // 成功时显示
+                error: '名称不可用'
+            },
+            // 执行的检查器
+            validator: nameValidate
+            }*/
+            if (!item) return;
+
+            const options = this.options;
+            // 原声选择 or 在此处选择
+            const input = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
+            const val = input.value;
+            const type = item.type;
+            const message = item.message;
+            const isRequired = item.required;
+            const validator = item.validator;
+
+            //验证
+            const result = validator(val);
+
+            // message
+            if (message) {
+                const msgTarget = typeof message.target === 'string' ? document.querySelector(message.target) : message.target;
+
+                if (!result) {
+                    msgTarget.innerHTML = message.error || message.placeholder || '输入错误';
+                } else {
+                    msgTarget.innerHTML = message.success || message.placeholder || '输入正确';
+                }
             }
 
-            this.options = Object.assign(this.DEFATLTOPTIONS, options);
+            // clear class
+            options.successClass && input.classList.remove(options.successClass);
+            options.errorClass && input.classList.remove(options.errorClass);
 
-            // 必填的长度
+            // 验证未通过 + 必选
+            if (isRequired && !result) this.required++;
+
+            if (!result) {
+                options.errorClass && input.classList.add(options.errorClass);
+                return;
+            }
+
+            // 保存数据
+            if (type) {
+                this.dataAry[type] = val;
+            }
+
+            options.successClass && input.classList.add(options.successClass);
+            return true;
+        },
+
+        // 检测
+        _run: function () {
+            const self = this;
+            const options = this.options;
+            const verifyArray = options.verifyArray;
+
+            verifyArray.forEach((item) => {
+                const target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
+                target.addEventListener(options.singleEvent, function () {
+                    self._check(item)
+                });
+            })
+        },
+
+        // 检测所有
+        _runAll() {
+            const self = this;
+            const verifyArray = this.options.verifyArray;
             this.required = 0;
 
+            verifyArray.forEach((item) => {
+                self._check(item);
+            })
 
-            this._init();
+            return !this.required && (this.options.isSaveData ? this.dataAry : true);
+        },
+
+        // 重置
+        _reset: function (deep) {
+            const options = this.options;
+            this.required = 0;
+
+            options.verifyArray.forEach(item => {
+                const target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
+                target.value = '';
+            })
         }
+    }
 
-        Validator.prototype = {
-            constructor: Validator,
 
-            _init: function () {
-                this.options.single && this._run();
+    const targetConfig = [{
+            target: '#name', // 检查的 input
+            type: 'name',
+            required: true,
+            message: {
+                target: '.name p', // 检查结果信息展示的地方
+                placeholder: '必填，长度为4~16个字符',
+                success: '名称可用' // 成功时显示
             },
-
-            // 验证 单个input
-            _check(item) {
-                const _this = this,
-                    validatorCfg = this.validatorConfig,
-                    input = query(config.target),
-                    val = input.value,
-                    msg = query(config.message.target),
-                    ownValidators = config.validators;
-
-
-                let required = false, // 不是必填项的话，只在有输入内容时进行检查 (默认为不必填)
-                    result = '';
-                //遍历验证器
-                ownValidators.forEach(item => {
-                    if (item.name == 'required') required = true; //是否有必填项
-
-                    const temp = _this.validators[item.name](val, item.args);
-
-                    if (!temp.status) {
-                        result = temp.message;
-                    }
-                })
-
-                if (!required && val.length === 0) return;
-
-                if (result) { //有错误信息
-                    validatorCfg.error && validatorCfg.error(input);
-                    msg.textContent = result;
-                } else { //验证通过
-                    validatorCfg.success && validatorCfg.success(input); // 成功回调
-                    msg.textContent = config.message.success || '';
-                }
-
-                return true;
+            // 执行的检查器
+            validator: nameValidate
+        },
+        // 邮箱表单校验
+        {
+            target: '#email',
+            type: 'email',
+            required: true,
+            message: {
+                target: '.email p',
+                success: '邮箱格式正确'
             },
-
-            // 检测
-            _run: function () {
-                const self = this;
-                const options = this.options;
-                const verifyArray = options.verifyArray;
-
-                verifyArray.forEach((item) => {
-                    const target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
-                    target.addEventListener(options.singleEvent, self._check(item));
-                })
+            // 验证器列表中无 required, 说明不是必填项，只有在输入内容时才会进行检验
+            validator: emailValidate
+        },
+        // 手机表单校验
+        {
+            target: '#tel',
+            type: 'tel',
+            required: true,
+            message: {
+                target: '.tel p',
+                success: '手机格式正确'
             },
-
-            // 检测所有
-            _runAll() {
-                const self = this;
-                const verifyArray = this.options.verifyArray;
-
-                verifyArray.forEach((item) => {
-                    self._check(item);
-                })
-
-                return !this.required;
-            },
-
-            // 重置
-            _reset: function () {
-                this.options.verifyArray.forEach(item => {
-                    const target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
-                    target.value = '';
-                    query(config.message.target).textContent = config.message.placeholder || '';
-                })
-
-                this.validatorConfig.reset(this.allTarget) // 重置回调
-            }
+            validator: phoneValidate
         }
+    ];
 
 
-        const targetConfig = [{
-                target: '#name', // 检查的 input
-                message: {
-                    target: '.name p', // 检查结果信息展示的地方
-                    placeholder: '必填，长度为4~16个字符',
-                    success: '名称可用' // 成功时显示
-                },
-                // 执行的检查器
-                validators: nameValidata
-            },
-            // 邮箱表单校验
-            {
-                target: '#email',
-                message: {
-                    target: '.email p',
-                    success: '邮箱格式正确'
-                },
-                // 验证器列表中无 required, 说明不是必填项，只有在输入内容时才会进行检验
-                validators: emailValidata
-            },
-            // 手机表单校验
-            {
-                target: '#tel',
-                message: {
-                    target: '.tel p',
-                    success: '手机格式正确'
-                },
-                validators: phoneValidata
-            }
-        ];
-
-    })()
-
-    const $submit = query('#submit'),
-        $reset = query('#reset'),
-        inputs = getClass('.form_group input'),
-        validator = new Validator({
+    const $submit = document.querySelector('#submit'),
+        $reset = document.querySelector('#reset'),
+        validate = new Validate({
             verifyArray: targetConfig
         });
 
     $submit.addEventListener('click', () => {
-        var runAll = validator._runAll()
+        var runAll = validate._runAll()
         console.log(runAll);
     })
     // 重置表单
-    $reset.addEventListener('click', () => validator._reset())
-
-})()
-
-
-const query = selector => document.querySelector(selector),
-    getClass = selector => document.querySelectorAll(selector);
-
-// 验证
-class Validator {
-    constructor(config) {
-        this.validatorConfig = config.validatorConfig;
-        this.targetConfig = config.targetConfig;
-        this.validators = config.validators;
-        this.allTarget = this.targetConfig.map(config => config.target);
-    }
-
-    // 验证逻辑
-    _check(config) {
-        const _this = this,
-            validatorCfg = this.validatorConfig,
-            input = query(config.target),
-            val = input.value,
-            msg = query(config.message.target),
-            ownValidators = config.validators;
-
-
-        let required = false, // 不是必填项的话，只在有输入内容时进行检查 (默认为不必填)
-            result = '';
-        //遍历验证器
-        ownValidators.forEach(item => {
-            if (item.name == 'required') required = true; //是否有必填项
-
-            const temp = _this.validators[item.name](val, item.args);
-
-            if (!temp.status) {
-                result = temp.message;
-            }
-        })
-
-        if (!required && val.length === 0) return;
-
-        if (result) { //有错误信息
-            validatorCfg.error && validatorCfg.error(input);
-            msg.textContent = result;
-        } else { //验证通过
-            validatorCfg.success && validatorCfg.success(input); // 成功回调
-            msg.textContent = config.message.success || '';
-        }
-    }
-
-    _run(target) {
-        const curConfig = this.targetConfig.filter(config =>
-            config.target.indexOf(target) > -1
-        )[0];
-        this._check(curConfig);
-    }
-    _runAll() {
-        const _this = this;
-        this.targetConfig.forEach((item) => {
-            _this._check(item);
-        })
-    }
-    // 重置表单
-    _reset() {
-        this.targetConfig.forEach(config => {
-            query(config.target).value = '';
-            query(config.message.target).textContent = config.message.placeholder || '';
-        })
-
-        this.validatorConfig.reset(this.allTarget) // 重置回调
-    }
-}
-
-
-const validatorConfig = {
-    // 失败时回调
-    error(target) {
-        target.parentElement.classList.remove('success')
-        target.parentElement.classList.add('error')
-    },
-    // 成功时回调
-    success(target) {
-        target.parentElement.classList.remove('error')
-        target.parentElement.classList.add('success')
-    },
-    // 重置时回调
-    reset(allTarget) { // 参数为每个检查表单的 dom  对象
-        allTarget.forEach(selector => {
-            query(selector).parentElement.classList.remove('error', 'success')
-        })
-    }
-};
-
-const targetConfig = [{
-        target: '#name', // 检查的 input
-        message: {
-            target: '.name p', // 检查结果信息展示的地方
-            placeholder: '必填，长度为4~16个字符',
-            success: '名称可用' // 成功时显示
-        },
-        // 执行的检查器
-        validators: [
-            // name: 验证器的名字, args: 验证器的配置参数
-            {
-                name: 'required',
-                args: {
-                    message: '名称不能为空'
-                }
-            }, {
-                name: 'minAndMax',
-                args: {
-                    min: 4,
-                    max: 16,
-                    message: '长度需在 4 ~ 16 之间'
-                }
-            },
-            {
-                name: 'noEmpty',
-                args: {
-                    message: '名称不能有空格'
-                }
-            }
-        ]
-    },
-    // 密码表单校验
-    {
-        target: '#password',
-        message: {
-            target: '.password p',
-            placeholder: '必填，长度为6~16个字符',
-            success: '密码可用'
-        },
-        validators: [{
-            name: 'required',
-            args: {
-                message: '密码不能为空'
-            }
-        }, {
-            name: 'minAndMax',
-            args: {
-                min: 6,
-                max: 16,
-                message: '长度需在 6 ~ 16 之间'
-            }
-        }]
-    },
-    // 确认密码表单校验
-    {
-        target: '#password_re',
-        message: {
-            target: '.password_re p',
-            placeholder: '两次输入相同密码',
-            success: '两次输入密码相同'
-        },
-        validators: [{
-            name: 'required',
-            args: {
-                message: '密码不能为空'
-            }
-        }, {
-            name: 'minAndMax',
-            args: {
-                min: 6,
-                max: 16,
-                message: '长度需在 6 ~ 16 之间'
-            }
-        }, {
-            name: 'equalOtherValue',
-            args: {
-                otherForm: '#password',
-                message: '两次输入的密码不一致'
-            }
-        }, ]
-    },
-    // 邮箱表单校验
-    {
-        target: '#email',
-        message: {
-            target: '.email p',
-            success: '邮箱格式正确'
-        },
-        // 验证器列表中无 required, 说明不是必填项，只有在输入内容时才会进行检验
-        validators: [{
-            name: 'email',
-            args: {
-                message: '邮箱格式错误'
-            }
-        }]
-    },
-    // 手机表单校验
-    {
-        target: '#tel',
-        message: {
-            target: '.tel p',
-            success: '手机格式正确'
-        },
-        validators: [{
-            name: 'tel',
-            args: {
-                message: '手机格式错误'
-            }
-        }]
-    }
-];
-
-
-// 获取字符长度 (中文长度为 2)
-const getCharLength = str =>
-    String(str).trim().split('')
-    .map(s => s.charCodeAt())
-    .map(n => (n < 0 || n > 255) ? 'aa' : 'a') // 中文占两字符, 其他一字符
-    .join('')
-    .length;
-
-
-// 各个表单验证器
-const Validators = {
-    // 必填(不能为空)
-    required: (str = '', {
-            message = ''
-        } = {}) =>
-        ({
-            status: !(getCharLength(str) === 0),
-            message // 错误信息
-        }),
-
-    //不能有空格
-    noEmpty: (str = '', {
-        message = ''
-    } = {}) => ({
-        status: /^[^ ]+$/.test(str),
-        message
-    }),
-
-    // 区间长度
-    minAndMax: (str = '', {
-        min = 0,
-        max = 0,
-        message = ''
-    } = {}) => {
-        const len = getCharLength(str)
-        return {
-            status: !(len < min || len > max),
-            message
-        }
-    },
-
-    // 和某表单的 value 相同
-    equalOtherValue: (str = '', {
-            otherForm = '',
-            message = ''
-        } = {}) =>
-        ({
-            status: (str === query(otherForm).value),
-            message
-        }),
-
-    // 邮箱
-    email: (str = '', {
-            message = ''
-        } = {}) =>
-        ({
-            status: /^(\w)+(\.\w+)*@(\w)+((\.\w{2,3}){1,3})$/.test(str),
-            message
-        }),
-
-    // 手机号
-    tel: (str = '', {
-            message = ''
-        } = {}) =>
-        ({
-            status: /^1[3|4|5|7|8][0-9]{9}$/.test(str),
-            message
-        })
-}
-
-window.onload = function () {
-    const $submit = query('#submit'),
-        $reset = query('#reset'),
-        inputs = getClass('.form_group input'),
-        validator = new Validator({
-            validatorConfig,
-            validators: Validators,
-            targetConfig
-        });
-
-    [].forEach.call(inputs, input => {
-        input.addEventListener('blur', ev => validator._run(ev.target.id))
-    })
-    $submit.addEventListener('click', () => validator._runAll())
-    // 重置表单
-    $reset.addEventListener('click', () => validator._reset())
-}
+    $reset.addEventListener('click', () => validate._reset())
+})();
