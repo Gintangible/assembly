@@ -1,0 +1,69 @@
+.citypop-scity {
+    margin: 100px auto;
+    width: 485px;
+    height: 255px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border: 1px solid #999;
+}
+
+.citypop-scity dl {
+    border-top: dotted 1px #cecfd3;
+    margin: 0;
+    overflow: hidden;
+    padding: 6px 0
+}
+
+.citypop-scity .dlbg {
+    background-color: #f9f9f9
+}
+
+.citypop-scity dl.dlbg-top {
+    border-top: 0
+}
+
+.citypop-scity dl dd,
+.citypop-scity dl dt {
+    float: left;
+    margin: 0
+}
+
+.citypop-scity dl dt {
+    width: 78px;
+    color: #333;
+    text-align: right;
+    font-weight: 700;
+    padding-top: 2px
+}
+
+.citypop-scity dl dt .nu,
+.citypop-scity dl dt .tx {
+    height: 20px;
+    line-height: 20px;
+    float: right;
+    padding: 0
+}
+
+.citypop-scity dl dt .nu {
+    float: left;
+    font-size: 18px;
+    color: #d0d0d0;
+    font-weight: 100;
+    padding-left: 10px
+}
+
+.citypop-scity dl dd {
+    width: 390px
+}
+
+.citypop-scity dl dd a:active,
+.citypop-scity dl dd a:link,
+.citypop-scity dl dd a:visited {
+    height: 20px;
+    line-height: 20px;
+    display: block;
+    float: left;
+    padding: 0 5px;
+    margin: 2px;
+    white-space: nowrap
+}
