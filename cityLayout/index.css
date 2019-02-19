@@ -1,3 +1,34 @@
+.city-content {
+    position: absolute;
+    top: 40px;
+    left: 0;
+    width: 485px;
+    position: relative;
+    z-index: 1;
+    border: 1px solid #ccd3e4;
+    background-color: #fff;
+}
+
+.citypop-firstchar {
+    height: 28px;
+    padding: 8px 6px;
+    border-bottom: dotted 1px #cecfd3;
+}
+
+
+.citypop-firstchar a {
+    float: left;
+    width: 19px;
+    height: 19px;
+    line-height: 19px;
+    border-radius: 2px;
+    margin: 4px;
+    font-size: 14px;
+    text-align: center;
+    border: 1px solid #cbddeb;
+    background-color: #f0f9fe;
+}
+
 .citypop-scity {
     margin: 100px auto;
     width: 485px;

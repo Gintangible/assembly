@@ -1,9 +1,23 @@
 var PlaceAuto = function (el, options) {
-    this.el = el;
     /*
-        isJump          字母跳转
-        isListHtml      显示城市列表
+        areaData                    {}                  城市列表
+        isJump                      boolean             显示城市列表
+        cityItemClass               string              城市标签类名
+        userCityId                  string/number       用户城市ID
+        defaultCityId               string/number       默认城市ID
+        changeCityFunctionArray     [fn,fn]             城市切换后的回调函数 数组
     */
+    this.el = el;
+
+    var options = Object.assign({
+        isJump: true,
+        areaData: {},
+        cityItemClass: 'auto-header-citypop-city',
+        userCityId: null,
+        defaultCityId: '110100',
+        changeCityFunctionArray: [],
+    }, options || {});
+
     this._init(options);
 };
 PlaceAuto.prototype = {
@@ -14,21 +28,67 @@ PlaceAuto.prototype = {
             this[k] = options[k];
         }
     },
+
     _init: function (options) {
         this._analysisOptions(options);
+        this._getUserArea();
         this._initCityPop();
-        // this._goto();
+        this._bind();
     },
-    _getUserArea: function () {
 
+    _initCityPop: function () {
+        var listHtml = this._listHtml();
+        console.log(listHtml)
+        this.el.innerHTML = listHtml;
     },
+
+    _hide: function () {
+        this.el.style.display = 'none';
+    },
+
+    _show: function () {
+        this.el.style.display = 'block';
+    },
+
+    _getUserArea: function () {
+        this.curCityId = this.userCityId ? this.userCityId : this.defaultCityId;
+    },
+
+    _bind: function () {
+        var _this = this,
+            citys = document.querySelectorAll('.' + this.cityClassName);
+        for (var i = 0; i < citys.length; i++) {
+            citys[i].onclick = function () {
+                _this._callback(this.getAttribute('data-info'));
+                // _this._hide();
+                window.location.reload();
+            };
+        }
+    },
+
+    _callback: function (cityInfo) {
+        var that = this;
+        cityInfo = eval(cityInfo);
+        for (var i = 0,
+                length = that.changeCityFunctionArray.length; i < length; i++) {
+            if (typeof that.changeCityFunctionArray[i] == "function") {
+                try {
+                    that.changeCityFunctionArray[i](cityInfo);
+                } catch (err) {}
+            }
+        }
+        return false;
+    },
+
     _listHtml: function () {
-        if (!this.isListHtml) return;
         var firstChar = [],
             zxCity = [],
             zx = [110100, 310100, 120100, 500100];
 
+        var defaultCityId = this.curCityId;
+
         var zxCityHtml = '',
+            firstCharHtml = '',
             listHtml = '';
 
         //首字母
@@ -39,6 +99,14 @@ PlaceAuto.prototype = {
             }
         }
 
+        // 首字母跳转
+        if (this.isJump) {
+            for (var i = 0; i < firstChar.length; i++) {
+                firstCharHtml += '<a name="auto-header-citypop-firstchar" id="auto-header-citypop-firstchar" target="_self" href="javascript:void(0);" data-key="' + firstChar[i] + '">' + firstChar[i] + '</a>';
+            }
+            firstCharHtml = '<div class="' + this.firstCharClass + '" id="auto-header-citypop-firstchar">' + firstCharHtml + '</div>';
+        }
+
         //直辖市
         for (var k = 0; k < this.areaData.CityItems.length; k++) {
             if (zx.indexOf(this.areaData.CityItems[k].I) > -1) {
@@ -46,10 +114,10 @@ PlaceAuto.prototype = {
             }
         }
 
-        // 直辖市html
+        // // 直辖市html
         for (var i = 0; i < zxCity.length; i++) {
-            zxCityHtml +=
-                '<a id="auto-header-citypop-city" name="auto-header-citypop-city" target="_self" href="javascript:void(0);" data-key="' +
+            var cur = this.cityItemClass + (defaultCityId == zxCity[i].I ? ' cur' : '');
+            zxCityHtml += '<a class="' + cur + '" target="_self" href="javascript:void(0);" data-key="' +
                 zxCity[i].I + '" data-info="[' + zxCity[i].I + ', \'' + zxCity[i].N + '\', \'' + zxCity[
                     i].P + '\']">' + zxCity[i].N + '</a>';
         }
@@ -74,8 +142,9 @@ PlaceAuto.prototype = {
                     var city = this.areaData.CityItems;
                     for (var k = 0; k < city.length; k++) {
                         if (city[k].S == provinceItem.I) {
+                            var cur = this.cityItemClass + (defaultCityId == city[k].I ? ' cur' : '');
                             rowHtml +=
-                                '<a name="auto-header-citypop-city" target="_self" href="javascript:void(0);" data-key="' +
+                                '<a class="' + cur + '" target="_self" href="javascript:void(0);" data-key="' +
                                 city[k].I + '"  data-info="[' + city[k].I + ', \'' + city[k].N +
                                 '\', \'' + city[k].P + '\']">' + city[k].N + '</a>';
                         }
@@ -88,53 +157,18 @@ PlaceAuto.prototype = {
                 listHtml += '<dl>';
                 listHtml += rowHtml;
                 listHtml += '</dl>';
-                lastChar = firstChar[i];
             }
         }
 
-        return listHtml;
-    },
-    _initCityPop: function () {
-        var listHtml = this._listHtml();
-        this.el.innerHTML = listHtml;
-    },
-    _goto: function () {
-        if (!this.isJump) return;
-        for (var i = 0; i < this.obj.goTo.length; i++) {
-            this.obj.goTo[i].onclick = function (e) {
-                e = e || window.event;
-                var _this = e.srcElement || e.target;
-                var isIe = !!(window.attachEvent && !window.opera);
-                if (!_this.getAttribute('data-key') || _this.getAttribute('data-key') == null) {
-                    return false;
-                }
-                var div = document.getElementById('auto-header-citypop-firstcharto' + _this.getAttribute(
-                    'data-key'));
-                if (isIe) {
-                    var top = div.offsetTop;
-                    if (top < 50) {
-                        var parent = div.parentNode;
-                        var i = 0;
-                        while (parent != null && parent != document.body) {
-                            if (i > 2) break;
-                            top += (parent.tagName != "div" && parent.tagName != "undefined") ?
-                                parent.offsetTop : 0;
-                            parent = parent.parentNode;
-                            i++;
-                        }
-                    }
-                    document.getElementById('auto-header-citypop-citylist').scrollTop = top - 82;
-                } else {
-                    document.getElementById('auto-header-citypop-citylist').scrollTop = div.offsetTop -
-                        82;
-                }
-            };
-        }
-    },
+        return firstCharHtml + '<div id="auto-header-citypop-citylist" class="citypop-scity">' + listHtml + '</div>';
+    }
 }
 
-document.querySelector('.citypop-scity') && new PlaceAuto(document.querySelector('.citypop-scity'), {
-    isListHtml: true,
+document.querySelector('.citypop-scity') && new placeFn.PlaceAuto(document.querySelector('.citypop-scity'), {
     areaData: CityItems,
-    cookieCityId: '350100'
+    cityClassName: 'auto-header-citypop-city',
+    userCityId: cookieFn.cookie.get('cookieCityId'),
+    changeCityFunctionArray: [function (cityInfo) {
+        cookieFn.cookie.set('cookieCityId', cityInfo[0])
+    }]
 })
