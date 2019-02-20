@@ -1,28 +1,9 @@
 ;
-(function () {;
-    function nameValidate(name) {
-        return name.length > 6;
-    }
-    /**
-     * validate email
-     * @param email
-     * @returns {boolean}
-     */
-    function emailValidate(email) {
-        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-        return re.test(email)
-    }
-
-    function phoneValidate(phone) {
-        const re = /^1[34578]\d{9}$/;
-        return re.test(phone)
-    }
-
-
+(function () {
     var Validate = function (options) {
         /*
          *   single             Boolean         是否开启单个验证
-         *   singleEvent        String          单个验证的事件类型
+         *   eventType          String          单个验证的事件类型
          *   verifyArray        [{
                                     target: '#name', // 检查的 input
                                     type: 'name',    //  用于保存数据，（提交的key）
@@ -41,11 +22,11 @@
          */
         this.DEFATLTOPTIONS = {
             single: true,
-            singleEvent: 'blur',
+            eventType: 'blur',
             verifyArray: [],
             successClass: 'success',
             errorClass: 'error',
-            isSaveData: true
+            isSaveData: false
         }
 
         this.options = Object.assign(this.DEFATLTOPTIONS, options);
@@ -81,22 +62,23 @@
             validator: nameValidate
             }*/
             if (!item) return;
-
-            const options = this.options;
             // 原声选择 or 在此处选择
-            const input = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
-            const val = input.value;
-            const type = item.type;
-            const message = item.message;
-            const isRequired = item.required;
-            const validator = item.validator;
+
+            var input = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
+
+            var options = this.options;
+            var val = input.value;
+            var type = item.type;
+            var message = item.message;
+            var isRequired = item.required;
+            var validator = item.validator;
 
             //验证
-            const result = validator(val);
+            var result = validator(val);
 
             // message
             if (message) {
-                const msgTarget = typeof message.target === 'string' ? document.querySelector(message.target) : message.target;
+                var msgTarget = typeof message.target === 'string' ? document.querySelector(message.target) : message.target;
 
                 if (!result) {
                     msgTarget.innerHTML = message.error || message.placeholder || '输入错误';
@@ -112,7 +94,7 @@
             // 验证未通过 + 必选
             if (isRequired && !result) this.required++;
 
-            if (!result) {
+            if (!result && isRequired) {
                 options.errorClass && input.classList.add(options.errorClass);
                 return;
             }
@@ -122,19 +104,24 @@
                 this.dataAry[type] = val;
             }
 
-            options.successClass && input.classList.add(options.successClass);
+            isRequired && options.successClass && input.classList.add(options.successClass);
             return true;
         },
 
         // 检测
         _run: function () {
-            const self = this;
-            const options = this.options;
-            const verifyArray = options.verifyArray;
+            var self = this;
+            var options = this.options;
+            var verifyArray = options.verifyArray;
 
-            verifyArray.forEach((item) => {
-                const target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
-                target.addEventListener(options.singleEvent, function () {
+            verifyArray.forEach(function (item) {
+                var target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
+                var event = item.event ? item.event : options.eventType;
+                console.log(event);
+                if (!target) {
+                    throw (item.target + 'maybe not existence; or ' + item.target + ' must be selector or class(id)');
+                }
+                target.addEventListener(event, function () {
                     self._check(item)
                 });
             })
@@ -142,11 +129,11 @@
 
         // 检测所有
         _runAll() {
-            const self = this;
-            const verifyArray = this.options.verifyArray;
+            var self = this;
+            var verifyArray = this.options.verifyArray;
             this.required = 0;
 
-            verifyArray.forEach((item) => {
+            verifyArray.forEach(function (item) {
                 self._check(item);
             })
 
@@ -154,15 +141,35 @@
         },
 
         // 重置
-        _reset: function (deep) {
-            const options = this.options;
+        _reset: function () {
+            var options = this.options;
             this.required = 0;
 
-            options.verifyArray.forEach(item => {
-                const target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
+            options.verifyArray.forEach(function (item) {
+                var target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
                 target.value = '';
             })
         }
+    };
+
+
+    // sample
+    function nameValidate(name) {
+        return name.length > 6;
+    }
+    /**
+     * validate email
+     * @param email
+     * @returns {boolean}
+     */
+    function emailValidate(email) {
+        const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+        return re.test(email)
+    }
+
+    function phoneValidate(phone) {
+        const re = /^1[34578]\d{9}$/;
+        return re.test(phone)
     }
 
 
