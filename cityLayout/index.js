@@ -1,8 +1,14 @@
+/* 渲染的结构
+ * <div class="citypop-firstchar"></div>
+ * <div class="citypop-scity"></div>
+ */
 var PlaceAuto = function (el, options) {
     /*
         areaData                    {}                  城市列表
         isJump                      boolean             显示城市列表
-        cityItemClass               string              城市标签类名
+        cityItemClass               string              单个城市类名
+        cityClass                   string              城市容器类名
+        firstCharClass              string              首字母容器类名
         userCityId                  string/number       用户城市ID
         defaultCityId               string/number       默认城市ID
         changeCityFunctionArray     [fn,fn]             城市切换后的回调函数 数组
@@ -11,8 +17,10 @@ var PlaceAuto = function (el, options) {
 
     var options = Object.assign({
         isJump: true,
-        areaData: {},
+        firstCharClass: 'citypop-firstchar',
+        cityClass: 'citypop-scity',
         cityItemClass: 'auto-header-citypop-city',
+        areaData: {},
         userCityId: null,
         defaultCityId: '110100',
         changeCityFunctionArray: [],
@@ -34,11 +42,11 @@ PlaceAuto.prototype = {
         this._getUserArea();
         this._initCityPop();
         this._bind();
+        this._goto();
     },
 
     _initCityPop: function () {
         var listHtml = this._listHtml();
-        console.log(listHtml)
         this.el.innerHTML = listHtml;
     },
 
@@ -56,7 +64,7 @@ PlaceAuto.prototype = {
 
     _bind: function () {
         var _this = this,
-            citys = document.querySelectorAll('.' + this.cityClassName);
+            citys = document.querySelectorAll('.' + this.cityItemClass);
         for (var i = 0; i < citys.length; i++) {
             citys[i].onclick = function () {
                 _this._callback(this.getAttribute('data-info'));
@@ -66,9 +74,24 @@ PlaceAuto.prototype = {
         }
     },
 
+    _goto: function () {
+        var chars = document.querySelectorAll('.auto-header-citypop-firstchar');
+        for (var i = 0; i < chars.length; i++) {
+            chars[i].onclick = function (e) {
+                e = e || window.event;
+                var target = e.srcElement || e.target,
+                    char = target.getAttribute('data-key');
+                if (!char) {
+                    return;
+                }
+                var div = document.getElementById('auto-header-citypop-firstcharto' + char);
+                document.getElementById('auto-header-citypop-citylist').scrollTop = div.offsetTop - 48;
+            };
+        }
+    },
+
     _callback: function (cityInfo) {
         var that = this;
-        cityInfo = eval(cityInfo);
         for (var i = 0,
                 length = that.changeCityFunctionArray.length; i < length; i++) {
             if (typeof that.changeCityFunctionArray[i] == "function") {
@@ -77,7 +100,7 @@ PlaceAuto.prototype = {
                 } catch (err) {}
             }
         }
-        return false;
+        return;
     },
 
     _listHtml: function () {
@@ -102,7 +125,7 @@ PlaceAuto.prototype = {
         // 首字母跳转
         if (this.isJump) {
             for (var i = 0; i < firstChar.length; i++) {
-                firstCharHtml += '<a name="auto-header-citypop-firstchar" id="auto-header-citypop-firstchar" target="_self" href="javascript:void(0);" data-key="' + firstChar[i] + '">' + firstChar[i] + '</a>';
+                firstCharHtml += '<a class="auto-header-citypop-firstchar" target="_self" href="javascript:void(0);" data-key="' + firstChar[i] + '">' + firstChar[i] + '</a>';
             }
             firstCharHtml = '<div class="' + this.firstCharClass + '" id="auto-header-citypop-firstchar">' + firstCharHtml + '</div>';
         }
@@ -160,7 +183,7 @@ PlaceAuto.prototype = {
             }
         }
 
-        return firstCharHtml + '<div id="auto-header-citypop-citylist" class="citypop-scity">' + listHtml + '</div>';
+        return firstCharHtml + '<div id="auto-header-citypop-citylist" class="' + this.cityClass + '">' + listHtml + '</div>';
     }
 }
 
