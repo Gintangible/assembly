@@ -93,7 +93,7 @@
             const code = (
                 type === this.province ? options.dataCode :
                 type === this.city ? this.$province && this._getSelectCode(this.$province) :
-                type === this.district ? this.$city && this._getSelectCode(this.$city) : ""
+                type === this.district ? this.$city && this._getSelectCode(this.$city) : type
             );
 
             // 本地缓存node
