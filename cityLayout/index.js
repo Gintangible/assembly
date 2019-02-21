@@ -91,8 +91,9 @@ PlaceAuto.prototype = {
     },
 
     _callback: function (cityInfo) {
-        var that = this;
-        for (var i = 0,
+        const that = this;
+        cityInfo = eval(cityInfo);
+        for (let i = 0,
                 length = that.changeCityFunctionArray.length; i < length; i++) {
             if (typeof that.changeCityFunctionArray[i] == "function") {
                 try {

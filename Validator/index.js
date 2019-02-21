@@ -64,21 +64,21 @@
             if (!item) return;
             // 原声选择 or 在此处选择
 
-            var input = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
+            const input = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
 
-            var options = this.options;
-            var val = input.value;
-            var type = item.type;
-            var message = item.message;
-            var isRequired = item.required;
-            var validator = item.validator;
+            const options = this.options;
+            const val = item.value || input.value || '';
+            const type = item.type;
+            const message = item.message;
+            const isRequired = item.required;
+            const validator = item.validator;
 
             //验证
-            var result = validator(val);
+            const result = validator(val);
 
             // message
             if (message) {
-                var msgTarget = typeof message.target === 'string' ? document.querySelector(message.target) : message.target;
+                const msgTarget = typeof message.target === 'string' ? document.querySelector(message.target) : message.target;
 
                 if (!result) {
                     msgTarget.innerHTML = message.error || message.placeholder || '输入错误';
@@ -105,19 +105,17 @@
             }
 
             isRequired && options.successClass && input.classList.add(options.successClass);
-            return true;
         },
 
         // 检测
         _run: function () {
-            var self = this;
-            var options = this.options;
-            var verifyArray = options.verifyArray;
+            const self = this;
+            const options = this.options;
+            const verifyArray = options.verifyArray;
 
             verifyArray.forEach(function (item) {
-                var target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
-                var event = item.event ? item.event : options.eventType;
-                console.log(event);
+                const target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
+                const event = item.event ? item.event : options.eventType;
                 if (!target) {
                     throw (item.target + 'maybe not existence; or ' + item.target + ' must be selector or class(id)');
                 }
@@ -129,8 +127,8 @@
 
         // 检测所有
         _runAll() {
-            var self = this;
-            var verifyArray = this.options.verifyArray;
+            const self = this;
+            const verifyArray = this.options.verifyArray;
             this.required = 0;
 
             verifyArray.forEach(function (item) {
@@ -142,11 +140,11 @@
 
         // 重置
         _reset: function () {
-            var options = this.options;
+            const options = this.options;
             this.required = 0;
 
             options.verifyArray.forEach(function (item) {
-                var target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
+                const target = typeof item.target === 'string' ? document.querySelector(item.target) : item.target;
                 target.value = '';
             })
         }
@@ -218,7 +216,7 @@
         });
 
     $submit.addEventListener('click', () => {
-        var runAll = validate._runAll()
+        const runAll = validate._runAll()
         console.log(runAll);
     })
     // 重置表单

@@ -73,6 +73,8 @@
 
         // set html
         _create: function () {
+            this.curPage = +this.curPage;
+            this.totalPage = +this.totalPage;
             if (this.curPage < 1) this.curPage = 1;
             if (this.curPage > this.totalPage) this.curPage = this.totalPage;
             if (this.isArrow) this._createArrow();
