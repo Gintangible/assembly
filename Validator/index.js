@@ -48,7 +48,7 @@
         },
 
         // 验证 单个input
-        _check(item) {
+        _check: function(item) {
             /* {
             target: '#name', // 检查的 input
             required: true,
@@ -126,7 +126,7 @@
         },
 
         // 检测所有
-        _runAll() {
+        _runAll: function() {
             const self = this;
             const verifyArray = this.options.verifyArray;
             this.required = 0;
