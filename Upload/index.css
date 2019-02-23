@@ -1,0 +1,58 @@
+.updata-wrap {
+    margin: 56px 0 0 192px;
+    @extend %clearfix;
+
+    .item {
+        @extend %fl;
+        @extend %pr;
+        margin-right: 70px;
+        width: 180px;
+
+        &:last-child {
+            margin-right: 0;
+        }
+    }
+
+    .item-yingye,
+    .item-user,
+    .item-place {
+        @extend %pr;
+        width: 180px;
+        height: 180px;
+        @extend %cp;
+        border: 1px dashed #d7d7d7;
+        @extend %oh;
+
+        &:before {
+            content: '';
+            @extend %pa;
+            left: 50%;
+            top: 50%;
+            margin: -20px 0 0 -20px;
+            @extend .ruzhu_updata;
+        }
+
+        //    w150
+        input[type="file"] {
+            @extend %pa;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
+
+        img {
+            width: 100%;
+            // height: 100%;
+        }
+    }
+
+    .item-intro {
+        margin-top: 16px;
+        line-height: 24px;
+        @extend %f20;
+        @extend %c3;
+        @extend %tac;
+    }
+}
