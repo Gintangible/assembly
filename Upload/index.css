@@ -1,58 +1,48 @@
 .updata-wrap {
     margin: 56px 0 0 192px;
-    @extend %clearfix;
+}
 
-    .item {
-        @extend %fl;
-        @extend %pr;
-        margin-right: 70px;
-        width: 180px;
+.updata-wrap .item {
+    float: left;
+    position: relative;
+    margin-right: 70px;
+    width: 180px;
 
-        &:last-child {
-            margin-right: 0;
-        }
-    }
 
-    .item-yingye,
-    .item-user,
-    .item-place {
-        @extend %pr;
-        width: 180px;
-        height: 180px;
-        @extend %cp;
-        border: 1px dashed #d7d7d7;
-        @extend %oh;
+}
 
-        &:before {
-            content: '';
-            @extend %pa;
-            left: 50%;
-            top: 50%;
-            margin: -20px 0 0 -20px;
-            @extend .ruzhu_updata;
-        }
+.updata-wrap .item:last-child {
+    margin-right: 0;
+}
 
-        //    w150
-        input[type="file"] {
-            @extend %pa;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-        }
+.item-yingye,
+.item-user,
+.item-place {
+    position: relative;
+    width: 180px;
+    height: 180px;
+    cursor: pointer;
+    border: 1px dashed #d7d7d7;
+    overflow: hidden;
+}
 
-        img {
-            width: 100%;
-            // height: 100%;
-        }
-    }
+.updata-wrap .item input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+}
 
-    .item-intro {
-        margin-top: 16px;
-        line-height: 24px;
-        @extend %f20;
-        @extend %c3;
-        @extend %tac;
-    }
+.updata-wrap .item img {
+    width: 100%;
+}
+
+.updata-wrap .item-intro {
+    margin-top: 16px;
+    line-height: 24px;
+    font-size: 20px;
+    color: #333;
+    text-align: center;
 }
