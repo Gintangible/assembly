@@ -96,6 +96,7 @@
                 type === this.district ? this.$city && this._getSelectCode(this.$city) : type
             );
 
+            if(!code) return;
             // 本地缓存node
             var item = this.saveData[code],
                 node = item && item.element;
