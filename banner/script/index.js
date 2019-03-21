@@ -1,21 +1,23 @@
-﻿// banner
-
-var Slider = function( options ){
+﻿var Slider = function (el, options) {
     var noop = function () {};
 
-
-    $.extend( this, {
-        element: null,
-        prefix : '',
-        arrow : true,
-        button : true,
-        interval : 3000,
-        auto : true,
-        current : 0,
-        events : {
-            btnChange : noop
+    this.el = el;
+    Object.assign(this, {
+        active: 'act',
+        isArrow: true,
+        arrowClass: 's-arrow',
+        prevClass: null,
+        nextClass: null,
+        isButton: true,
+        buttonClass: 's-button',
+        interval: 3000,
+        isAuto: true,
+        direction: 'right',
+        curIndex: 0,
+        events: {
+            btnChange: noop
         }
-    }, options || {} );
+    }, options || {})
 
     this.view = null;
     this.items = [];
@@ -23,16 +25,23 @@ var Slider = function( options ){
     //this.distance = 0;
     this.tID = -2;
 
-    this.create();
+    this._init();
 };
 Slider.prototype = {
-    constructor : Slider,
+    constructor: Slider,
 
-    create : function(){
+    _init: function () {
+        this._create();
+    },
+
+    toArray: function (nodelist) {
+        return [].slice.call(nodelist);
+    },
+    _create: function () {
         var self = this,
-            element = this.element,
-            view = this.view = element.children(':first'),
-            items = this.items = view.children();
+            element = this.el,
+            view = this.view = element.firstElementChild,
+            items = this.items = this.toArray(view.children);
 
         // 获取每次移动的距离
         //this.distance = items.outerWidth(true);
@@ -46,133 +55,120 @@ Slider.prototype = {
         this.autoSlider();
     },
 
-    createArrow : function(){
-        if (!this.arrow) return;
+    createArrow: function () {
+        if (!this.isArrow) return;
 
-        var self = this,
-            element = this.element;
+        const self = this;
+        const element = this.el;
+        const div = document.createElement('div');
+        this.arrowClass && div.classList.add(this.arrowClass);
+        div.innerHTML = `<i class="s-prev">&lt;</i><i class="s-next">&gt;</i>`;
 
-        element.append(
-            '<div class="s-arrow">'+
-                '<i class="s-prev">&lt;</i>'+
-                '<i class="s-next">&gt;</i>'+
-            '</div>')
-            .on('click', '.s-prev', function(){
-                self.prev();
-            })
-            .on('click', '.s-next', function(){
-                self.next();
-            });
+        const prev = div.querySelector('.s-prev');
+        const next = div.querySelector('.s-next');
 
+        this.prevClass && prev.classList.add(this.prevClass);
+        this.nextClass && next.classList.add(this.nextClass);
+
+        element.append(div);
+
+        prev.addEventListener('click', () => {
+            self.prev();
+        })
+
+        next.addEventListener('click', () => {
+            self.next();
+        })
     },
 
-    createButton : function () {
-        if( !this.button ) return;
+    createButton: function () {
+        if (!this.isButton) return;
 
-        var self = this,
-            element = this.element,
-            length = this.length,
-            events = this.events,
-            str = '', i, button, buttons;
+        const self = this;
+        const element = this.el;
+        const len = this.length;
+        let events = this.events;
+        const ul = document.createElement('ul');
+        ul.classList.add(this.buttonClass);
 
-        for(i = 0; i < length; i++){
-            str += '<li class="'+ (this.current === i ? "cur" : "" )+'"></li>';
+        let = str = '';
+
+        for (i = 0; i < len; i++) {
+            str += '<li class="' + (this.curIndex === i ? this.active : "") + '"></li>';
         }
 
-        button = $('<ul class="s-button">'+str+'</ul>');
-        buttons = button.find("li");
-        element.append(button)
-            .on('click', '.s-button li', function(){
-                self.move($(this).index());
-            });
+        ul.innerHTML = str;
+        element.append(ul);
+
+        const buttons = ul.querySelectorAll('li');
+
+        buttons.forEach((item, i) => {
+            item.addEventListener('click', () => {
+                self.move(i);
+            })
+        })
 
         var originalOnBeforeMove = events.btnChange;
 
-        events.btnChange = function ( index ) {
-            buttons.removeClass('cur').eq(index).addClass('cur');
+        events.btnChange = function (index) {
+            buttons.forEach(item => {
+                item.classList.remove(self.active);
+            })
+            buttons[index].classList.add(self.active);
             return originalOnBeforeMove.apply(this, arguments);
         }
     },
 
-    autoSlider : function () {
-        if( !this.auto ) return;
+    autoSlider: function () {
+        if (!this.isAuto) return;
 
         var self = this,
-            element = this.element,
-            start = function() {
+            element = this.el,
+            start = function () {
                 stop();
-                self.tID = setInterval( function(){
+                self.tID = setInterval(function () {
                     self.next();
-                },self.interval );
+                }, self.interval);
             },
-            stop = function() {
-                if( self.tID !== -1 ) {
-                    clearInterval( self.tID );
+            stop = function () {
+                if (self.tID !== -1) {
+                    clearInterval(self.tID);
                     self.tID = -1;
                 }
             };
 
         start();
-        element.on("mouseenter", function () {
+        element.addEventListener('mouseenter', () => {
             stop();
-        }).on("mouseleave", function () {
+        })
+        element.addEventListener('mouseleave', () => {
             start();
         })
-
     },
 
-    move : function( index ){
+    move: function (index) {
         var self = this,
             length = this.length,
             events = this.events;
 
-        if( index < 0 ){
+        if (index < 0) {
             index = length - 1;
         }
-        if( index > length - 1 ){
+        if (index > length - 1) {
             index = 0;
         }
+        this.items.forEach(item => {
+            item.classList.remove(self.active);
+        })
+        this.items[index].classList.add(this.active);
+        this.curIndex = index;
 
-        this.lazy(this.items.eq(index));
-        this.items.removeClass("cur").eq(index).addClass('cur');
-        this.current = index;
-
-        events.btnChange && events.btnChange.call(this, index >= length ? 0 : index);
+        events.btnChange && events.btnChange.call(this, index);
     },
-    prev : function(){
-        this.move(this.current - 1 );
+    prev: function () {
+        this.move(this.curIndex - 1);
     },
-    next : function(){
-        this.move(this.current + 1);
-    },
-
-    lazy : function(item){
-        item.find('img[data-src]').each(function(){
-            var src = this.getAttribute('data-src');
-            if (src) {
-                this.setAttribute('src', src);
-                this.removeAttribute('data-src');
-            }
-        });
+    next: function () {
+        this.move(this.curIndex + 1);
     }
-
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
