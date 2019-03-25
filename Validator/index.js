@@ -48,15 +48,17 @@
         },
 
         // 验证 单个input
-        _check(item) {
+        _check: function (item) {
             /* {
             target: '#name', // 检查的 input
             required: true,
             message: {
                 target: '.name p', // 检查结果信息展示的地方
                 placeholder: '必填，长度为4~16个字符',
-                success: '名称可用' // 成功时显示
-                error: '名称不可用'
+                successmessage: '名称可用' // 成功时显示
+                errormessage: '名称不可用',
+                successClass: '',
+                errorClass: ''
             },
             // 执行的检查器
             validator: nameValidate
@@ -79,11 +81,15 @@
             // message
             if (message) {
                 const msgTarget = typeof message.target === 'string' ? document.querySelector(message.target) : message.target;
-
+                // clear message class
+                message.successClass && msgTarget.classList.remove(message.successClass);
+                message.errorClass && msgTarget.classList.remove(message.errorClass);
                 if (!result) {
                     msgTarget.innerHTML = message.error || message.placeholder || '输入错误';
+                    message.errorClass && msgTarget.classList.add(message.errorClass);
                 } else {
                     msgTarget.innerHTML = message.success || message.placeholder || '输入正确';
+                    message.successClass && msgTarget.classList.add(message.successClass);
                 }
             }
 
@@ -126,7 +132,7 @@
         },
 
         // 检测所有
-        _runAll() {
+        _runAll: function () {
             const self = this;
             const verifyArray = this.options.verifyArray;
             this.required = 0;
@@ -178,7 +184,7 @@
             message: {
                 target: '.name p', // 检查结果信息展示的地方
                 placeholder: '必填，长度为4~16个字符',
-                success: '名称可用' // 成功时显示
+                successmessage: '名称可用' // 成功时显示
             },
             // 执行的检查器
             validator: nameValidate
@@ -190,7 +196,7 @@
             required: true,
             message: {
                 target: '.email p',
-                success: '邮箱格式正确'
+                successmessage: '邮箱格式正确'
             },
             // 验证器列表中无 required, 说明不是必填项，只有在输入内容时才会进行检验
             validator: emailValidate
@@ -202,7 +208,7 @@
             required: true,
             message: {
                 target: '.tel p',
-                success: '手机格式正确'
+                successmessage: '手机格式正确'
             },
             validator: phoneValidate
         }

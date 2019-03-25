@@ -41,7 +41,7 @@
         this.nextHTML = '';
         this.startHTML = '';
         this.endHTML = '';
-        this.pageHTML = ''
+        this.pageHTML = '';
         this.infoHTML = '';
 
         this._init(baseOptions);
@@ -49,7 +49,7 @@
 
     Paganation.prototype = {
 
-        contructor: Paganation,
+        constructor: Paganation,
 
         _analysisOptions: function (options) {
             for (let k in options) {
