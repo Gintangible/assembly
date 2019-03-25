@@ -2,32 +2,30 @@
 (function (doc) {
     var Paganation = function (el, options) {
         /*
-         * baseUrl          string      跳转链接(*)
-         * curPage          number      当前页(*) 从1开始
-         * totalPage        number      总页数(*)
-         * arrow            boolean     是否有上下页
-         * showLen          number      显示的按钮个数
-         * pageDetail       boolean     是否显示具体的页码
-         * isTail           boolean     首尾页
-         * isShowInfo       boolean     是否显示页数详情
-         * ellipsisClass    string      省略号类名
-         * prefix           string      按钮类名前缀
+         * curIndex      number  当前页(*)
+         * dataAry       number  分页数组
+         * data          array   需分页的数据
+         * showDataCount number  每页显示数
+         * arrow         boolean 是否有上下页
+         * showLen       number  显示的按钮个数
+         * cur           string  按钮激活类名
          */
-
-        this.el = el;
         let baseOptions = Object.assign({
-            baseUrl: null,
-            curPage: 1,
-            totalPage: 100,
+            data: [],
+            showDataCount: 10,
+            curPage: 0,
             isArrow: true,
-            showNum: 10,
+            showNum: 5,
             prefix: 'page-',
             disabledClass: 'page-disabled',
             isTail: true,
             pageDetail: true,
-            isShowInfo: true,
+            isShowInfo: false,
             ellipsisClass: ''
         }, options);
+
+        this.el = el;
+        this.dataAry = [];
 
         /*
          * prev     string      上一页
@@ -48,7 +46,6 @@
     };
 
     Paganation.prototype = {
-
         contructor: Paganation,
 
         _analysisOptions: function (options) {
@@ -58,25 +55,76 @@
         },
 
         _init: function (options) {
+            var _this = this;
             this._analysisOptions(options);
 
-            if (!this.baseUrl) {
-                throw new Error(`must set baseUrl`);
+            this._dataParse(this.data, function () {
+                _this._render(0);
+            });
+        },
+
+        _dataParse: function (data, callback) {
+            var showDataCount = this.showDataCount;
+            var pageCount = this.totalPage = Math.ceil(data.length / showDataCount);
+            for (var i = 0; i < pageCount; i++) {
+                this.dataAry.push({
+                    page: i,
+                    data: data.slice(showDataCount * i, showDataCount * (i + 1))
+                });
             }
 
-            if (!this.el) {
-                throw new Error(`must set a page container`);
-            };
+            callback && callback();
+        },
 
-            this._render();
+        // 页面内容改变时变化
+        _render: function (index) {
+            // index 为当前页
+            this.curPage = +index;
+            this._contentRender(index);
+            this._pageRender();
+        },
+
+        _contentRender: function (index) {
+            var item = this.dataAry[index],
+                node = item.element;
+            if (!node) {
+                if (typeof this._contentFormat !== 'function') {
+                    throw new Error('_contentFormat必须是一个function');
+                }
+                node = this._contentFormat(item.data);
+                item.element = node;
+            }
+            if (typeof this._contentShow !== 'function') {
+                throw new Error('_contentShow必须是一个function');
+            }
+
+            this._contentShow(node);
+        },
+        _contentFormat: function (data) {
+            var str = '';
+            data.forEach((item, index) => {
+                str += '<div>' + item + '</div>'
+            })
+            return str;
+        },
+
+        _contentShow: function (node, content, callback) {
+            // 此处为内容渲染的函数
+            console.log('you must set you _contentShow function');
+            var content = content || doc.querySelector('.page-content');
+            if (content) {
+                content.innerHTML = node;
+            }
+
+            callback && callback();
         },
 
         // set html
         _create: function () {
             this.curPage = +this.curPage;
             this.totalPage = +this.totalPage;
-            if (this.curPage < 1) this.curPage = 1;
-            if (this.curPage > this.totalPage) this.curPage = this.totalPage;
+            if (this.curPage < 0) this.curPage = 0;
+            if (this.curPage > this.totalPage - 1) this.curPage = this.totalPage - 1;
             if (this.isArrow) this._createArrow();
             if (this.isTail) this._createTail();
             if (this.isShowInfo) this._createInfo();
@@ -86,24 +134,24 @@
         // 上下页
         _createArrow: function () {
             const disabledClass = this.disabledClass;
-            const prevUrl = this.curPage == 1 ? 'javascript:void(0);' : this.baseUrl + (this.curPage - 1);
-            const nextUrl = this.curPage == this.totalPage ? 'javascript:void(0);' : this.baseUrl + (+this.curPage + 1);
-            const prevDisabled = this.curPage == 1 ? disabledClass : '';
-            const nextDisabled = this.curPage == this.totalPage ? disabledClass : '';
+            const prevPage = this.curPage - 1;
+            const nextPage = +this.curPage + 1;
+            const prevDisabled = prevPage < 0 ? disabledClass : '';
+            const nextDisabled = nextPage > this.totalPage - 1 ? disabledClass : '';
 
-            this.prevHTML = '<a class="' + this.prefix + 'item ' + prevDisabled + '" href="' + prevUrl + '">上一页</a>';
-            this.nextHTML = '<a class="' + this.prefix + 'item ' + nextDisabled + '" href="' + nextUrl + '">下一页</a>';
+            this.prevHTML = '<span class="' + this.prefix + 'item ' + prevDisabled + '" data-page="' + prevPage + '">上一页</span>';
+            this.nextHTML = '<span class="' + this.prefix + 'item ' + nextDisabled + '" data-page="' + nextPage + '">下一页</span>';
         },
 
         // 首尾页
         _createTail: function () {
             const disabledClass = this.disabledClass;
-            const startUrl = this.curPage == 1 ? 'javascript:void(0);' : this.baseUrl + 1;
-            const endUrl = this.curPage == this.totalPage ? 'javascript:void(0);' : this.baseUrl + this.totalPage;
-            const startDisabled = this.curPage == 1 ? disabledClass : '';
-            const endDisabled = this.curPage == this.totalPage ? disabledClass : '';
-            this.startHTML = '<a class="' + this.prefix + 'item ' + startDisabled + '" href="' + startUrl + '">首页</a>';
-            this.endHTML = '<a class="' + this.prefix + 'item ' + endDisabled + '" href="' + endUrl + '">尾页</a>';
+            const startPage = 0;
+            const endPage = this.totalPage - 1;
+            const startDisabled = this.curPage == 0 ? disabledClass : '';
+            const endDisabled = this.curPage == this.totalPage - 1 ? disabledClass : '';
+            this.startHTML = '<span class="' + this.prefix + 'item ' + startDisabled + '" data-page="' + startPage + '">首页</span>';
+            this.endHTML = '<span class="' + this.prefix + 'item ' + endDisabled + '" data-page="' + endPage + '">尾页</span>';
         },
 
         // 页数详情
@@ -121,16 +169,13 @@
             const prefix = this.prefix;
             const centerStr = '<span class="' + this.ellipsisClass + '">...</span>';
 
-            let urlFn = function (i) {
-                return self.baseUrl + i;
-            };
             let htmlStr = function (i) {
                 const endabled = self.curPage == i ? self.disabledClass : '';
-                return '<a class="' + prefix + 'item ' + endabled + '" href="' + urlFn(i) + '">' + i + '</a>';
+                return '<span data-page="' + i + '" class="' + endabled + '">' + (i + 1) + '</span>';
             };
 
             if (showNum >= totalPage) {
-                for (let i = 1; i <= totalPage; i++) {
+                for (let i = 0; i < totalPage; i++) {
                     str += htmlStr(i)
                 }
             } else {
@@ -138,9 +183,9 @@
                     for (let i = 0; i < showNum - 1; i++) {
                         str += htmlStr(+curPage + i);
                     }
-                    str += centerStr + htmlStr(totalPage);
+                    str += centerStr + htmlStr(totalPage - 1);
                 } else { // 尾部
-                    for (let i = 1; i <= showNum; i++) {
+                    for (let i = 0; i < showNum; i++) {
                         str += htmlStr(totalPage - showNum + i);
                     }
                 }
@@ -149,14 +194,27 @@
             this.pageHTML = str;
         },
 
-        _goPage: function (i) {
-            this.curPage = i;
-            this._render();
-        },
-
-        _render: function () {
+        _pageRender: function () {
             this._create();
             this.el.innerHTML = this.infoHTML + this.startHTML + this.prevHTML + this.pageHTML + this.nextHTML + this.endHTML;
+            this._bindEvent();
+        },
+
+        _bindEvent: function () {
+            const spans = this.el.querySelectorAll('span');
+            const _this = this;
+
+            spans.forEach(item => {
+                item.addEventListener('click', function () {
+                    const index = this.getAttribute('data-page');
+                    if (this.className.indexOf(_this.disabledClass) > -1) return;
+                    _this._refresh(index);
+                });
+            });
+        },
+
+        _refresh: function (index) {
+            this._render(index);
         }
     }
 
