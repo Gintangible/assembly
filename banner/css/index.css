@@ -1,4 +1,25 @@
-html, body, header, main, nav, footer, article, section, div, p, h1, h2, h3, h4, h5, ul, ol, li, dl, dt, dd, input {
+html,
+body,
+header,
+main,
+nav,
+footer,
+article,
+section,
+div,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+ul,
+ol,
+li,
+dl,
+dt,
+dd,
+input {
   margin: 0;
   padding: 0;
 }
@@ -7,7 +28,8 @@ html {
   -webkit-font-smoothing: antialiased;
 }
 
-ul, ol {
+ul,
+ol {
   list-style: none;
 }
 
@@ -20,7 +42,8 @@ img {
   border: 0 none;
 }
 
-em, i {
+em,
+i {
   font-style: normal;
 }
 
@@ -32,187 +55,96 @@ input:-webkit-autofill {
   -webkit-box-shadow: 0 0 0px 1000px white inset;
 }
 
-button, input[type="button"], input[type="reset"], input[type="submit"] {
+button,
+input[type="button"],
+input[type="reset"],
+input[type="submit"] {
   -webkit-appearance: none;
 }
 
-html {
-  font-size: 20px;
-  /* 10/16=62.5%  20/16=125% */
-}
-
-@media only screen and (min-width: 360px) {
-  html {
-    font-size: 140.625% !important;
-  }
-}
-@media only screen and (min-width: 375px) {
-  html {
-    font-size: 146.484375% !important;
-  }
-}
-@media only screen and (min-width: 414px) {
-  html {
-    font-size: 161.71875% !important;
-  }
-}
-@media only screen and (min-width: 480px) {
-  html {
-    font-size: 187.5% !important;
-  }
-}
-@media only screen and (min-width: 568px) {
-  html {
-    font-size: 221.875% !important;
-  }
-}
-@media only screen and (min-width: 640px) {
-  html {
-    font-size: 250% !important;
-  }
-}
-@media only screen and (min-width: 667px) {
-  html {
-    font-size: 260.546875% !important;
-  }
-}
-@media only screen and (min-width: 720px) {
-  html {
-    font-size: 281.25% !important;
-  }
-}
-@media only screen and (min-width: 736px) {
-  html {
-    font-size: 287.5% !important;
-  }
-}
-@media only screen and (min-width: 768px) {
-  html {
-    font-size: 300% !important;
-  }
-}
-@media only screen and (min-width: 1024px) {
-  html {
-    font-size: 400% !important;
-  }
-}
-@media only screen and (min-width: 1080px) {
-  html {
-    font-size: 421.875% !important;
-  }
-}
-@media only screen and (min-width: 1280px) {
-  html {
-    font-size: 500% !important;
-  }
-}
-@media only screen and (min-width: 1366px) {
-  html {
-    font-size: 533.59375% !important;
-  }
-}
-@media only screen and (min-width: 1440px) {
-  html {
-    font-size: 562.5% !important;
-  }
-}
-@media only screen and (min-width: 1920px) {
-  html {
-    font-size: 750% !important;
-  }
-}
-@media only screen and (min-width: 2560px) {
-  html {
-    font-size: 1000% !important;
-  }
-}
-.s-port li {
-  display: none;
-}
-
-.s-port li.cur {
-  display: block;
-}
-
-.s-button li {
-  float: left;
-}
-
-.slider, .s-port {
+.slider {
   position: relative;
-}
-
-.s-port li, .s-button, .s-prev, .s-next {
-  position: absolute;
-}
-
-.slider {
   margin: 0 auto;
-}
-
-.s-prev, .s-next {
-  cursor: pointer;
-}
-
-.s-prev, .s-next {
-  text-align: center;
-}
-
-.slider {
   width: 520px;
   height: 280px;
 }
 
 .s-port {
+  position: relative;
   width: 100%;
   height: 100%;
 }
+
 .s-port li {
+  position: absolute;
   left: 0;
   top: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: all .5s;
 }
+
+.s-port li.act {
+  opacity: 1;
+}
+
+.s-port li a {
+  display: block;
+  height: 100%;
+}
+
 .s-port img {
   width: 100%;
   height: 100%;
 }
 
 .s-button {
-  left: 50%;
+  position: absolute;
+  left: 0;
+  right: 0;
   bottom: 30px;
-  margin-left: -60px;
-  width: 120px;
+  text-align: center;
   height: 20px;
+  font-size: 0;
 }
+
 .s-button li {
+  display: inline-block;
   margin-right: 10px;
   width: 20px;
   height: 20px;
   background: #ccc;
   border-radius: 50%;
 }
-.s-button li.cur {
+
+.s-button li.act {
   background: #f00;
 }
 
-.s-prev, .s-next {
+.s-prev,
+.s-next {
+  position: absolute;
   top: 50%;
   margin-top: -20px;
   width: 22px;
   height: 40px;
   line-height: 40px;
   font-size: 16px;
+  cursor: pointer;
+  text-align: center;
   background: rgba(0, 0, 0, 0.3);
 }
-.s-prev:hover, .s-next:hover {
+
+.s-prev:hover,
+.s-next:hover {
   background: rgba(0, 0, 0, 0.5);
 }
 
 .s-prev {
   left: 0;
-  background-position: 0 0;
 }
 
 .s-next {
   right: 0;
-  background-position: -28px 0;
 }
