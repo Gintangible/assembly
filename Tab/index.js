@@ -1,40 +1,56 @@
 // 切换
-function Tab(obj){
+function Tab(obj) {
     var defaultOptions = {
         btns: null,
         cons: null,
         event: 'click',
         active: 'act',
-        callback: function(){}
+        afterTabEvent: function () {}
     }
     Object.assign(defaultOptions, obj || {})
     for (let k in defaultOptions) {
         this[k] = defaultOptions[k];
     }
+
     this._init();
 }
 
 Tab.prototype = {
     construct: Tab,
-    _init: function(){
+    _init: function () {
         const _this = this;
-        this.btns.forEach((item,index) =>{
-            item.addEventListener('click', function () {
+
+        this.lenMatch();
+
+        this.btns.forEach((item, index) => {
+            item.addEventListener(_this.event, function () {
                 _this._reset();
                 _this._set(index);
-                typeof _thiscallback === 'function' && _this.callback(index);
+                typeof _this.afterTabEvent === 'function' && _this.afterTabEvent(index, _this);
             })
         })
     },
-    _reset: function(){
+    _reset: function () {
         const _this = this;
-        this.btns.forEach((item,index) =>{
+
+        this.btns.forEach((item, index) => {
             item.classList.remove(_this.active);
-            _this.cons[index].remove(_this.active);
+            _this.cons[index] && _this.cons[index].classList.remove(_this.active);
         })
     },
-    _set: function(i){
+    _set: function (i) {
         this.btns[i].classList.add(this.active);
-        this.cons[i].classList.add(this.active);
+        this.cons[i] && this.cons[i].classList.add(this.active);
+    },
+    lenMatch: function () {
+        if (this.btns.length !== this.cons.length) {
+            return '内容个数与按钮数不匹配';
+        }
     }
 }
+
+
+new Tab({
+    btns: document.querySelectorAll('.tab li'),
+    cons: document.querySelectorAll('.content li'),
+})
