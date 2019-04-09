@@ -6,8 +6,10 @@ function Tab(obj) {
         event: 'click',
         active: 'act',
         afterTabEvent: function () {}
-    }
-    Object.assign(defaultOptions, obj || {})
+    };
+
+    Object.assign(defaultOptions, obj || {});
+
     for (let k in defaultOptions) {
         this[k] = defaultOptions[k];
     }
@@ -43,9 +45,8 @@ Tab.prototype = {
         this.cons[i] && this.cons[i].classList.add(this.active);
     },
     lenMatch: function () {
-        if (this.btns.length !== this.cons.length) {
-            return '内容个数与按钮数不匹配';
-        }
+        console.assert(this.btns.length !== this.cons.length, '内容个数与按钮数不匹配');
+        return;
     }
 }
 

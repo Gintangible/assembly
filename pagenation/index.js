@@ -21,10 +21,11 @@
             totalPage: 100,
             isArrow: true,
             showNum: 10,
-            prefix: 'page-',
+            itemClass: 'page-item',
             disabledClass: 'page-disabled',
             isTail: true,
             pageDetail: true,
+            totalClass: '',
             isShowInfo: true,
             ellipsisClass: ''
         }, options);
@@ -91,8 +92,8 @@
             const prevDisabled = this.curPage == 1 ? disabledClass : '';
             const nextDisabled = this.curPage == this.totalPage ? disabledClass : '';
 
-            this.prevHTML = '<a class="' + this.prefix + 'item ' + prevDisabled + '" href="' + prevUrl + '">上一页</a>';
-            this.nextHTML = '<a class="' + this.prefix + 'item ' + nextDisabled + '" href="' + nextUrl + '">下一页</a>';
+            this.prevHTML = '<a class="' + this.itemClass + ' ' + prevDisabled + '" href="' + prevUrl + '">上一页</a>';
+            this.nextHTML = '<a class="' + this.itemClass + ' ' + nextDisabled + '" href="' + nextUrl + '">下一页</a>';
         },
 
         // 首尾页
@@ -102,13 +103,13 @@
             const endUrl = this.curPage == this.totalPage ? 'javascript:void(0);' : this.baseUrl + this.totalPage;
             const startDisabled = this.curPage == 1 ? disabledClass : '';
             const endDisabled = this.curPage == this.totalPage ? disabledClass : '';
-            this.startHTML = '<a class="' + this.prefix + 'item ' + startDisabled + '" href="' + startUrl + '">首页</a>';
-            this.endHTML = '<a class="' + this.prefix + 'item ' + endDisabled + '" href="' + endUrl + '">尾页</a>';
+            this.startHTML = '<a class="' + this.itemClass + ' ' + startDisabled + '" href="' + startUrl + '">首页</a>';
+            this.endHTML = '<a class="' + this.itemClass + ' ' + endDisabled + '" href="' + endUrl + '">尾页</a>';
         },
 
         // 页数详情
         _createInfo: function () {
-            this.infoHTML = '<span class="' + this.prefix + 'total">共<i>' + this.totalPage + '</i>页</span><span class="' + this.prefix + 'cur">当前第<i>' + this.curPage + '</i>页</span>'
+            this.infoHTML = '<span class="page_total ' + this.totalClass + '">共<i>' + this.totalPage + '</i>页</span><span class="' + this.prefix + 'cur">当前第<i>' + this.curPage + '</i>页</span>'
         },
 
         // 具体的页码
@@ -118,7 +119,6 @@
             let showNum = this.showNum;
             let totalPage = this.totalPage;
             let curPage = this.curPage;
-            const prefix = this.prefix;
             const centerStr = '<span class="' + this.ellipsisClass + '">...</span>';
 
             let urlFn = function (i) {
@@ -126,7 +126,7 @@
             };
             let htmlStr = function (i) {
                 const endabled = self.curPage == i ? self.disabledClass : '';
-                return '<a class="' + prefix + 'item ' + endabled + '" href="' + urlFn(i) + '">' + i + '</a>';
+                return '<a class="' + this.itemClass + ' ' + endabled + '" href="' + urlFn(i) + '">' + i + '</a>';
             };
 
             if (showNum >= totalPage) {

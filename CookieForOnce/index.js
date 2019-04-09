@@ -14,7 +14,7 @@ var Cookie = function () {
      */
     Class.set = function (name, value, days) {
         var exdata = new Date();
-        exdata.setDate(exdata.getDate() + (days ? days : 30));//默认一个月
+        exdata.setDate(exdata.getDate() + (days ? days : 30)); //默认一个月
         // exdata.setTime( exdata.getTime() + (expiredays * 24*60*60*1000) )
         //encodeURI 代替 escape
         document.cookie = (prefix + name) + '=' + encodeURI(value) + ';expires=' + exdata.toGMTString();
@@ -55,14 +55,14 @@ var Cookie = function () {
     };
 
     return Class;
-} ();
+}();
 
 /*
-*	@param {String} name    [name]
-* 	@param {String} time    [time] (s)
-*/
-var DoOnce = function (name,time) {
-    var nowTime = Math.round(new Date().getTime());//获取当前时间时间戳
+ *	@param {String} name    [name]
+ * 	@param {String} time    [time] (s)
+ */
+var DoOnce = function (name, time) {
+    var nowTime = Math.round(new Date().getTime()); //获取当前时间时间戳
 
     // 定点时间
     /*var date = new Date();
@@ -72,13 +72,13 @@ var DoOnce = function (name,time) {
     var expiryTime = Math.round(date.getTime());
 	*/
 
-	if(time) expiryTime = nowTime + time;
+    if (time) expiryTime = nowTime + time;
 
     leftTime = expiryTime - nowTime;
 
-	Cookie.set(name, "1", leftTime);
+    Cookie.set(name, "1", leftTime);
 };
 
-export function(name,time){
-	DoOnce(name,time);
+export default function (name, time) {
+    DoOnce(name, time);
 };

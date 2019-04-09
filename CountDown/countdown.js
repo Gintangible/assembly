@@ -73,14 +73,70 @@
         }
     }
 
-    function CountDown(config) {
+    function CountDown(config = {}) {
+        var defaultOptions = {
+            fixNow: 3 * 1000,
+            fixNowDate: false,
+            render: function (outstring) {
+                console.log(outstring);
+            },
+            end: function () {
+                console.log(`the end!`);
+            },
+            endTime: new Date().valueOf() + 5 * 1000
+        };
+
+        Object.assign(defaultOptions, config);
+
+        for (let k in defaultOptions) {
+            this[k] = defaultOptions[k];
+        }
+
         this.init();
     }
 
     CountDown.prototype = {
         construct: CountDown,
-        init: function() {
-
+        init: function () {
+            var self = this;
+            if (this.fixNowDate) {
+                var fix = new timer(this.fixNow);
+                fix.add(function () {
+                    self.getNowTime(function (now) {
+                        self.now = now;
+                    });
+                });
+            }
+            var index = msInterval.add(function () {
+                self.now += delayTime;
+                if (self.now >= self.endTime) {
+                    msInterval.remove(index);
+                    self.end();
+                } else {
+                    self.render(self.getOutString());
+                }
+            });
+        },
+        getBetween: function () {
+            return _formatTime(this.endTime - this.now);
+        },
+        getOutString: function () {
+            var between = this.getBetween();
+            return this.template.replace(/{(\w*)}/g, function (m, key) {
+                return between.hasOwnProperty(key) ? between[key] : "";
+            });
+        },
+        getNowTime: function (cb) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('get', '/', true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 3) {
+                    var now = xhr.getResponseHeader('Date');
+                    cb(new Date(now).valueOf());
+                    xhr.abort();
+                }
+            };
+            xhr.send(null);
         }
     }
 })();
