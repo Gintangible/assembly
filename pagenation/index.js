@@ -49,7 +49,6 @@
     };
 
     Paganation.prototype = {
-
         constructor: Paganation,
 
         _analysisOptions: function (options) {

@@ -81,15 +81,21 @@
             // message
             if (message) {
                 const msgTarget = typeof message.target === 'string' ? document.querySelector(message.target) : message.target;
+                message.successClass = options.successClass || message.successClass;
+                message.errorClass = options.errorClass || message.errorClass;
                 // clear message class
-                message.successClass && msgTarget.classList.remove(message.successClass);
-                message.errorClass && msgTarget.classList.remove(message.errorClass);
+                msgTarget.classList.remove(message.successClass);
+                msgTarget.classList.remove(message.errorClass);
                 if (!result) {
-                    msgTarget.innerHTML = message.error || message.placeholder || '输入错误';
-                    message.errorClass && msgTarget.classList.add(message.errorClass);
+                    if (!message.msg) {
+                        msgTarget.innerHTML = message.error || message.placeholder || '输入错误';
+                    }
+                    msgTarget.classList.add(message.errorClass);
                 } else {
-                    msgTarget.innerHTML = message.success || message.placeholder || '输入正确';
-                    message.successClass && msgTarget.classList.add(message.successClass);
+                    if (!message.msg) {
+                        msgTarget.innerHTML = message.error || message.placeholder || '输入错误';
+                    }
+                    msgTarget.classList.add(message.successClass);
                 }
             }
 
