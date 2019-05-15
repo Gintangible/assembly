@@ -1,6 +1,6 @@
 ;
-(function () {
-    function leftPad(str, len, ch) {
+(function() {
+    function leftPad(str, len = 2, ch = 0) {
         str = String(str);
         var i = -1;
         if (!ch && ch !== 0) ch = ' ';
@@ -16,8 +16,8 @@
             m = Math.floor(s / 60);
         console.log(leftPad(m / 60 / 24, 2, 0), leftPad(m / 60 % 24, 2, 0), leftPad(m % 60, 2, 0), leftPad(s % 60, 2, 0))
         return {
-            d: leftPad(m / 60 / 24, 2, 0),
-            h: leftPad(m / 60 % 24, 2, 0),
+            d: Math.floor(m / 60 / 24),
+            h: leftPad(Math.floor(m / 60) % 24, 2, 0),
             m: leftPad(m % 60, 2, 0),
             s: leftPad(s % 60, 2, 0)
         };
@@ -28,10 +28,10 @@
             delaytime: 1000,
             template: '{d}:{h}:{m}:{s}',
             now: new Date().valueOf(),
-            render: function (outstring) {
+            render: function(outstring) {
                 console.log(outstring);
             },
-            end: function () {
+            end: function() {
                 console.log(`the end!`);
             },
             endTime: new Date().valueOf() + 5 * 1000
@@ -48,9 +48,9 @@
 
     CountDown.prototype = {
         construct: CountDown,
-        init: function () {
+        init: function() {
             var self = this;
-            (function () {
+            (function() {
                 self.now += self.delaytime
                 if (self.now >= self.endTime) {
                     self.end();
@@ -60,13 +60,13 @@
                 }
             })();
         },
-        getBetween: function () {
+        getBetween: function() {
             return formatTime(this.endTime - this.now);
         },
-        getOutString: function () {
+        getOutString: function() {
             var between = this.getBetween();
             console.log(between)
-            return this.template.replace(/{(\w*)}/g, function (m, key) {
+            return this.template.replace(/{(\w*)}/g, function(m, key) {
                 return between.hasOwnProperty(key) ? between[key] : "";
             });
         }
