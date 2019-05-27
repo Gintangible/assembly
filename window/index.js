@@ -22,3 +22,4 @@ function ping(options) {
     }
     nIMG.src = url + '/' + startTime;
 }
+
